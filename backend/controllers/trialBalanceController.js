@@ -7,13 +7,13 @@ const executeTrialBalance = async (req, res, responseMode = 'json') => {
         const sortWise = req.query.sortWise || req.body.sortWise || 'CodeWise'; // 'CodeWise' or 'NameWise'
 
         // Extract month and year from toDate (format: YYYY-MM-DD)
-        const dateObj = new Date(toDate);
-        if (isNaN(dateObj.getTime())) {
+        const parts = toDate.split('-');
+        if (parts.length !== 3) {
             throw new Error('Invalid To Date format. Expected YYYY-MM-DD.');
         }
         
-        const pfYear = String(dateObj.getFullYear());
-        const pfMonth = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const pfYear = parts[0];
+        const pfMonth = parts[1];
         const pfDt = toDate;
         const cnyn = sortWise === 'NameWise' ? 'N' : 'C';
 
