@@ -1,14 +1,15 @@
-/* GL REPORT PAGE */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-.gl-report-wrapper {
+/* ── WRAPPER ── */
+.gl-wrapper {
   padding: 24px;
   background: #f0f2f5;
   min-height: calc(100vh - 74px);
+  font-family: 'Poppins', sans-serif;
 }
 
-/* CARD */
-
-.gl-report-card {
+/* ── CARD ── */
+.gl-card {
   background: #ffffff;
   border: 1.5px solid #d1d5db;
   border-radius: 6px;
@@ -16,81 +17,79 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* HEADER */
-
-.gl-report-header {
+/* ── HEADER ── */
+.gl-header {
   background: linear-gradient(90deg, #273449, #5b8dee);
   color: #ffffff;
   font-size: 15px;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
   padding: 12px 18px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
-/* BODY */
-
-.gl-report-body {
-  background: #f8f9fb;
-  padding: 20px 18px 16px 18px;
+/* ── FORM SECTION ── */
+.gl-form-section {
+  border: 1px solid #c8d8f0;
+  border-radius: 4px;
+  margin: 16px;
+  padding: 20px 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* ROW */
-
-.gl-report-row {
+/* ── ROW ── */
+.gl-row {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
-/* LABEL */
-
-.gl-report-label {
-  font-family: 'Poppins', sans-serif;
+/* ── LABEL ── */
+.gl-label {
   font-size: 13px;
   font-weight: 500;
   color: #374151;
-  white-space: nowrap;
   min-width: 190px;
+  white-space: nowrap;
 }
 
-/* INPUT */
-
-.gl-report-input {
-  height: 36px;
-  width: 200px;
+/* ── INPUT ── */
+.gl-input {
+  height: 34px;
+  width: 220px;
   border: 1.5px solid #d1d5db;
   border-radius: 4px;
   padding: 0 12px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-family: 'Poppins', sans-serif;
   color: #374151;
   background: #ffffff;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s;
 }
 
-.gl-report-input:focus {
+.gl-input:focus {
   border-color: #4f7cff;
   box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.12);
 }
 
-.gl-report-input::placeholder {
+.gl-input::placeholder {
   color: #9ca3af;
 }
 
-/* FOOTER */
-
-.gl-report-footer {
+/* ── BUTTON ROW ── */
+.gl-btn-row {
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
   padding-top: 4px;
 }
 
-/* BUTTONS */
-
+/* ── BUTTONS ── */
 .gl-btn {
   height: 36px;
   padding: 0 24px;
@@ -101,6 +100,8 @@
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.15s ease;
+  color: #ffffff;
+  white-space: nowrap;
 }
 
 .gl-btn:hover {
@@ -112,14 +113,14 @@
   transform: translateY(0);
 }
 
-.gl-btn-print {
+.gl-btn-blue {
   background: #273449;
-  color: #ffffff;
 }
 
-.gl-btn-view {
-  background: #273449;
-  color: #ffffff;
+.gl-btn-sm {
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
 }
 
 .gl-btn:disabled {
@@ -128,166 +129,257 @@
   transform: none;
 }
 
-/* ERROR & LOADING */
-
-.gl-report-error {
-  color: #c0392b;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.82rem;
-  margin: 0 0 10px 0;
+/* ── ERROR & LOADING ── */
+.gl-error {
+  font-size: 12.5px;
+  color: #dc2626;
+  margin: 0;
+  padding: 4px 0;
 }
 
-.gl-report-loading {
+.gl-loading {
+  font-size: 12.5px;
   color: #2980b9;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.82rem;
-  margin: 0 0 10px 0;
+  margin: 0;
+  padding: 4px 0;
 }
 
-/* REPORT TABLE */
+/* ── PREVIEW PANEL ── */
+.gl-preview {
+  margin: 0 16px 16px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  min-height: 300px;
+  background: #f8f9fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-.gl-report-table-wrapper {
-  margin-top: 24px;
+.gl-preview-empty {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* ── REPORT WRAPPER (inside preview) ── */
+.gl-report-wrapper {
+  width: 100%;
+  padding: 12px;
+  align-self: flex-start;
+}
+
+.gl-report-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px 10px 4px;
+}
+
+/* ── GRID TABLE (Text Report View) ── */
+.gl-table-wrapper {
+  width: 100%;
   overflow-x: auto;
+  padding: 16px;
 }
 
 .gl-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 12.5px;
   font-family: 'Poppins', sans-serif;
-  font-size: 0.82rem;
 }
 
-.gl-table th,
-.gl-table td {
-  border: 1px solid #d1d5db;
+.gl-table th {
+  background: #273449;
+  color: #ffffff;
   padding: 8px 12px;
   text-align: left;
+  font-weight: 500;
   white-space: nowrap;
+}
+
+.gl-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid #e5e7eb;
   color: #374151;
-}
-
-.gl-table thead tr {
-  background: linear-gradient(90deg, #273449, #5b8dee);
-  color: #ffffff;
-}
-
-.gl-table thead tr th {
-  color: #ffffff;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .gl-table tbody tr:nth-child(even) {
-  background-color: #f4f6f8;
+  background: #f4f6f8;
 }
 
 .gl-table tbody tr:hover {
-  background-color: #dce9f5;
+  background: #dce9f5;
 }
 
 .gl-record-count {
-  margin-top: 8px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.78rem;
+  font-size: 12px;
   color: #6b7280;
+  margin: 8px 0 0 0;
   text-align: right;
 }
 
-/* PRINT STYLES */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FORMATTED GL REPORT STYLES  (matches the picture)
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-.print-only {
-  display: none;
+.gl-formatted-report {
+  background: #ffffff;
+  padding: 16px 20px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
 }
 
-.gl-print-header {
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.gl-print-header h2 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.1rem;
+/* Org name banner */
+.gl-fmt-org-name {
+  font-size: 13.5px;
   font-weight: 700;
-  color: #273449;
-  margin: 0 0 4px 0;
-}
-
-.gl-print-header p {
+  text-align: center;
+  color: #000;
+  margin-bottom: 12px;
   font-family: 'Poppins', sans-serif;
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin: 0;
+  letter-spacing: 0.2px;
 }
 
-@media print {
+/* Meta info grid */
+.gl-fmt-meta-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 10px;
+}
 
-  /* Hide sidebar and navbar */
+.gl-fmt-meta-left,
+.gl-fmt-meta-right {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.gl-fmt-meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  color: #222;
+  font-family: 'Poppins', sans-serif;
+}
+
+.gl-fmt-meta-key {
+  font-weight: 600;
+  min-width: 95px;
+}
+
+.gl-fmt-meta-sep {
+  font-weight: 600;
+}
+
+.gl-fmt-meta-val {
+  color: #111;
+}
+
+/* Divider line */
+.gl-fmt-divider {
+  border: none;
+  border-top: 1.5px solid #000;
+  margin: 10px 0 12px 0;
+}
+
+/* Formatted table */
+.gl-fmt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.gl-fmt-th {
+  background: #f0f0f0;
+  font-weight: 600;
+  font-size: 12px;
+  color: #111;
+  padding: 7px 10px;
+  border: 1px solid #aaa;
+  text-align: left;
+  vertical-align: top;
+}
+
+.gl-fmt-td {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  color: #222;
+  vertical-align: top;
+}
+
+.gl-fmt-row-alt {
+  background: #f9f9f9;
+}
+
+.gl-fmt-table tbody tr:hover {
+  background: #eef4fb;
+}
+
+/* Column widths */
+.gl-fmt-col-srno    { width: 5%;  text-align: center; }
+.gl-fmt-col-glcode  { width: 8%; }
+.gl-fmt-col-prodcode { width: 12%; }
+.gl-fmt-col-glgroup { width: 9%; }
+.gl-fmt-col-prodname { width: 52%; }
+.gl-fmt-col-lastno  { width: 10%; text-align: right; }
+
+/* ── PRINT STYLES ── */
+@media print {
   .navbar,
   .sidebar {
     display: none !important;
   }
 
-  /* Hide the input card */
-  .no-print {
-    display: none !important;
-  }
-
-  /* Show print-only elements */
-  .print-only {
-    display: block !important;
-  }
-
-  /* Break flex/grid layout so content fills full page width */
-  .layout-wrapper,
-  .layout-body,
-  .main-content,
-  .page-content {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Reset wrapper */
-  .gl-report-wrapper {
+  .gl-wrapper {
     padding: 0;
     background: #ffffff;
     min-height: unset;
-    margin: 0 !important;
-    width: 100% !important;
   }
 
-  .gl-report-table-wrapper {
-    margin-top: 0;
-    overflow: visible;
+  .gl-card {
+    border: none;
+    box-shadow: none;
   }
 
-  .gl-table {
-    width: 100%;
-  }
-
-  .gl-table th,
-  .gl-table td {
-    font-size: 0.72rem;
-    padding: 5px 8px;
-  }
-
-  .gl-table thead tr {
-    background: #273449 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* No hover effects while printing */
-  .gl-table tbody tr:hover {
-    background-color: transparent;
-  }
-
-  /* Hide record count */
+  .gl-form-section,
+  .gl-report-toolbar,
   .gl-record-count {
-    display: none;
+    display: none !important;
+  }
+
+  .gl-preview {
+    border: none;
+    background: #ffffff;
+    min-height: unset;
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .gl-report-wrapper {
+    padding: 0;
+  }
+
+  .gl-formatted-report {
+    border: none;
+    padding: 0;
+  }
+
+  .gl-fmt-table th,
+  .gl-fmt-table td {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+
+  .gl-fmt-org-name {
+    font-size: 12px;
+  }
+
+  .gl-fmt-meta-row {
+    font-size: 9px;
   }
 }

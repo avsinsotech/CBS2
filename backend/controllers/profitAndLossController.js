@@ -22,7 +22,11 @@ exports.show = async (req, res) => {
             .input('FromDate', sql.VarChar, asOnDate)
             .execute('SP_ProfitAndLoss');
 
-        res.json(result.recordset || result.recordsets[0]);
+        if (result.recordsets && result.recordsets.length > 1) {
+            res.json({ recordsets: result.recordsets });
+        } else {
+            res.json(result.recordset || result.recordsets[0] || []);
+        }
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -61,7 +65,12 @@ exports.profitLossReport = async (req, res) => {
             .input('FromDate', sql.VarChar, asOnDate)
             .execute('SP_ProfitAndLoss');
 
-        res.json(result.recordset || result.recordsets[0]);
+        // Return all recordsets for structured report rendering
+        if (result.recordsets && result.recordsets.length > 1) {
+            res.json({ recordsets: result.recordsets });
+        } else {
+            res.json(result.recordset || result.recordsets[0] || []);
+        }
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -88,7 +97,7 @@ exports.textReportView = async (req, res) => {
             .input('FromDate', sql.VarChar, asOnDate)
             .execute('SP_ProfitAndLoss');
 
-        res.json(result.recordset || result.recordsets[0]);
+        res.json(result.recordsets && result.recordsets.length > 1 ? { recordsets: result.recordsets } : (result.recordset || result.recordsets[0] || []));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -115,7 +124,11 @@ exports.reportWithWorkingDay = async (req, res) => {
             .input('FromDate', sql.VarChar, asOnDate)
             .execute('SP_ProfitAndLoss_day');
 
-        res.json(result.recordset || result.recordsets[0]);
+        if (result.recordsets && result.recordsets.length > 1) {
+            res.json({ recordsets: result.recordsets });
+        } else {
+            res.json(result.recordset || result.recordsets[0] || []);
+        }
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

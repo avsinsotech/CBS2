@@ -1,73 +1,72 @@
-// import { useState } from "react";
-// import "./BalanceSheet.css";
 
-// function BalanceSheet() {
-//   const [branchCode, setBranchCode] = useState("1");
-//   const [reportType, setReportType] = useState("");
-
-//   const reportOptions = ["As On Date", "N-Format", "Marathi BS", "N-Format Marathi BS"];
-
-//   return (
-//     <div className="bs-wrapper">
-//       <div className="bs-card">
-
-//         {/* HEADER */}
-//         <div className="bs-header">BalanceSheet</div>
-
-//         {/* FORM SECTION */}
-//         <div className="bs-form-section">
-
-//           {/* BRANCH CODE */}
-//           <div className="bs-row">
-//             <label className="bs-label">Branch Code</label>
-//             <input
-//               className="bs-input"
-//               value={branchCode}
-//               onChange={(e) => setBranchCode(e.target.value)}
-//             />
-//           </div>
-
-//           {/* REPORT TYPE RADIOS — single row */}
-//           <div className="bs-radio-row">
-//             {reportOptions.map((opt) => (
-//               <label key={opt} className="bs-radio-label">
-//                 <input
-//                   type="radio"
-//                   name="reportType"
-//                   value={opt}
-//                   checked={reportType === opt}
-//                   onChange={(e) => setReportType(e.target.value)}
-//                 />
-//                 {opt}
-//               </label>
-//             ))}
-//           </div>
-
-//         </div>
-
-//         {/* PREVIEW PANEL */}
-//         <div className="bs-preview">
-//           <div className="bs-preview-empty">
-//             {reportType ? `Preview: ${reportType}` : "Select a report type to preview"}
-//           </div>
-//         </div>
-
-//         {/* FOOTER */}
-//         <div className="bs-footer">
-//           <button className="bs-btn" onClick={() => window.print()}>Print</button>
-//           <button className="bs-btn" onClick={() => alert(`View: ${reportType}`)}>View Report</button>
-//         </div>
-
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default BalanceSheet;
 
 import { useState } from "react";
 import "./BalanceSheet.css";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 
+// ─── helpers ────────────────────────────────────────────────
+function parseDate(raw) {
+  const parts = raw.trim().split("/");
+  if (parts.length !== 3) return null;
+  let [d, m, y] = parts;
+  if (y.length === 2) y = "20" + y;
+  return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+
+function splitDate(raw) {
+  // returns { PFDATE, PFMONTH, PFYEAR } from DD/MM/YYYY
+  const iso = parseDate(raw);
+  if (!iso) return null;
+  const dt = new Date(iso);
+  return {
+    PFDATE: iso,
+    PFMONTH: String(dt.getMonth() + 1).padStart(2, "0"),
+    PFYEAR: String(dt.getFullYear()),
+  };
+}
+
+function splitDateEnd(raw) {
+  const iso = parseDate(raw);
+  if (!iso) return null;
+  const dt = new Date(iso);
+  return {
+    PEDATE: iso,
+    PEMONTH: String(dt.getMonth() + 1).padStart(2, "0"),
+    PEYEAR: String(dt.getFullYear()),
+  };
+}
+
+// ─── API endpoint map ────────────────────────────────────────
+// [reportType][action] → { path, needsRange }
+const ENDPOINT_MAP = {
+  "As On Date": {
+    Show:                    { path: "/api/balance-sheet/asondate/show",                needsRange: true  },
+    "Balance Sheet Report":  { path: "/api/balance-sheet/asondate/balancesheetreport",  needsRange: false },
+    "Report with Working Day":{ path: "/api/balance-sheet/asondate/reportwithworkingday",needsRange: false },
+    "Text Report View":      { path: "/api/balance-sheet/asondate/balancesheetreport",  needsRange: false },
+    "Balancesheet Summary":  { path: "/api/balance-sheet/asondate/balancesheetsummary", needsRange: false },
+  },
+  "N-Format": {
+    Show:                    { path: "/api/balance-sheet/nformat/show",               needsRange: true },
+    "Balance Sheet Report":  { path: "/api/balance-sheet/nformat/balancesheetreport", needsRange: true },
+    "Text Report View":      { path: "/api/balance-sheet/nformat/balancesheetreport", needsRange: true },
+  },
+  "Marathi BS": {
+    Show:                    { path: "/api/balance-sheet/marathibs/show",               needsRange: true  },
+    "Balance Sheet Report":  { path: "/api/balance-sheet/marathibs/balancesheetreport", needsRange: false },
+    "Working Day":           { path: "/api/balance-sheet/marathibs/workingday",         needsRange: false },
+    "Text Report View":      { path: "/api/balance-sheet/marathibs/balancesheetreport", needsRange: false },
+    "Balancesheet Summary":  { path: "/api/balance-sheet/marathibs/workingday",         needsRange: false },
+  },
+  "N-Format Marathi BS": {
+    Show:                    { path: "/api/balance-sheet/nformatmarathi/show",               needsRange: true },
+    "Balance Sheet Report":  { path: "/api/balance-sheet/nformatmarathi/balancesheetreport", needsRange: true },
+    "Text Report View":      { path: "/api/balance-sheet/nformatmarathi/balancesheetreport", needsRange: true },
+  },
+};
+
+// ─── component ───────────────────────────────────────────────
 function BalanceSheet() {
   const [form, setForm] = useState({
     reportType: "As On Date",
@@ -76,38 +75,143 @@ function BalanceSheet() {
     fromDate: "01/04/2025",
     toDate: "30/03/2026",
     skipBranchAdj: false,
-    textReportName: ""
+    textReportName: "",
   });
+
+  const [reportData, setReportData] = useState([]);
+  const [columns, setColumns]       = useState([]);
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState("");
+  const [fetched, setFetched]       = useState(false);
+  const [activeAction, setActiveAction] = useState("");
+
+  const isSingleDate =
+    form.reportType === "As On Date" || form.reportType === "Marathi BS";
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
+    setFetched(false);
+    setError("");
+  };
+
+  // ── validate & build URL ──────────────────────────────────
+  function buildURL(action) {
+    const ep = ENDPOINT_MAP[form.reportType]?.[action];
+    if (!ep) return { error: "Endpoint not configured for this action." };
+
+    const PBRCD = form.branchCode.trim();
+    if (!PBRCD) return { error: "Branch Code is required." };
+
+    const params = new URLSearchParams({ PBRCD });
+
+    if (ep.needsRange) {
+      // from + to dates
+      const from = splitDate(form.fromDate);
+      const to   = splitDateEnd(form.toDate);
+      if (!from) return { error: "From Date must be in DD/MM/YYYY format." };
+      if (!to)   return { error: "To Date must be in DD/MM/YYYY format." };
+      params.set("PFDATE",  from.PFDATE);
+      params.set("PFMONTH", from.PFMONTH);
+      params.set("PFYEAR",  from.PFYEAR);
+      params.set("PEDATE",  to.PEDATE);
+      params.set("PEMONTH", to.PEMONTH);
+      params.set("PEYEAR",  to.PEYEAR);
+    } else {
+      // single date
+      const dateStr = isSingleDate ? form.asOnDate : form.fromDate;
+      const d = splitDate(dateStr);
+      if (!d) return { error: "Date must be in DD/MM/YYYY format." };
+      params.set("PFDATE",  d.PFDATE);
+      params.set("PFMONTH", d.PFMONTH);
+      params.set("PFYEAR",  d.PFYEAR);
+    }
+
+    return { url: `${API_BASE_URL}${ep.path}?${params}` };
+  }
+
+  // ── fetch ─────────────────────────────────────────────────
+  const callAPI = async (action) => {
+    const { url, error: buildErr } = buildURL(action);
+    if (buildErr) { setError(buildErr); return; }
+
+    setLoading(true);
+    setError("");
+    setFetched(false);
+    setActiveAction(action);
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Server error: ${res.status}`);
+      }
+      const data = await res.json();
+      if (data.length > 0) {
+        setColumns(Object.keys(data[0]));
+      } else {
+        setColumns([]);
+      }
+      setReportData(data);
+      setFetched(true);
+    } catch (err) {
+      setError(err.message || "Failed to fetch report.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrint = async () => {
+    if (!fetched) await callAPI("Balance Sheet Report");
+    setTimeout(() => window.print(), 400);
+  };
+
+  // ── buttons per report type ───────────────────────────────
+  const buttons = {
+    "As On Date": [
+      { label: "Show",                    action: "Show" },
+      { label: "Balance Sheet Report",    action: "Balance Sheet Report" },
+      { label: "Report with Working Day", action: "Report with Working Day" },
+      { label: "Text Report View",        action: "Text Report View" },
+      { label: "Balancesheet Summary",    action: "Balancesheet Summary" },
+    ],
+    "N-Format": [
+      { label: "Show",                 action: "Show" },
+      { label: "Balance Sheet Report", action: "Balance Sheet Report" },
+      { label: "Text Report View",     action: "Text Report View" },
+    ],
+    "Marathi BS": [
+      { label: "Show",                    action: "Show" },
+      { label: "Balance Sheet Report",    action: "Balance Sheet Report" },
+      { label: "Working Day",             action: "Working Day" },
+      { label: "Text Report View",        action: "Text Report View" },
+      { label: "Balancesheet Summary",    action: "Balancesheet Summary" },
+    ],
+    "N-Format Marathi BS": [
+      { label: "Show",                 action: "Show" },
+      { label: "Balance Sheet Report", action: "Balance Sheet Report" },
+      { label: "Text Report View",     action: "Text Report View" },
+    ],
   };
 
   const reportOptions = ["As On Date", "N-Format", "Marathi BS", "N-Format Marathi BS"];
 
-  // As On Date & Marathi BS → single date + 5 buttons
-  // N-Format & N-Format Marathi BS → from/to date + 3 buttons
-  const isSingleDate = form.reportType === "As On Date" || form.reportType === "Marathi BS";
-
   return (
     <div className="bs-wrapper">
-      <div className="bs-card">
+      <div className="bs-card no-print">
 
-        {/* HEADER */}
         <div className="bs-header">BalanceSheet</div>
 
-        {/* FORM SECTION */}
         <div className="bs-form-section">
 
-          {/* BRANCH CODE */}
+          {/* Branch Code */}
           <div className="bs-row">
             <label className="bs-label">Branch Code</label>
             <input className="bs-input" name="branchCode"
               value={form.branchCode} onChange={handleChange} />
           </div>
 
-          {/* RADIO OPTIONS */}
+          {/* Radio */}
           <div className="bs-radio-row">
             {reportOptions.map((opt) => (
               <label key={opt} className="bs-radio-label">
@@ -118,25 +222,25 @@ function BalanceSheet() {
             ))}
           </div>
 
-          {/* CONDITIONAL DATE FIELDS */}
+          {/* Date fields */}
           {isSingleDate ? (
             <div className="bs-row">
               <label className="bs-label">As On Date</label>
               <input className="bs-input" name="asOnDate"
-                value={form.asOnDate} onChange={handleChange} />
+                value={form.asOnDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
             </div>
           ) : (
             <div className="bs-row">
               <label className="bs-label">From Date</label>
               <input className="bs-input" name="fromDate"
-                value={form.fromDate} onChange={handleChange} />
+                value={form.fromDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
               <label className="bs-inline-label">To Date</label>
               <input className="bs-input" name="toDate"
-                value={form.toDate} onChange={handleChange} />
+                value={form.toDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
             </div>
           )}
 
-          {/* SKIP BRANCH ADJ CHECKBOX */}
+          {/* Skip Branch Adj */}
           <div className="bs-row">
             <label className="bs-checkbox-label">
               <input type="checkbox" name="skipBranchAdj"
@@ -145,7 +249,7 @@ function BalanceSheet() {
             </label>
           </div>
 
-          {/* TEXT REPORT NAME */}
+          {/* Text Report Name */}
           <div className="bs-row">
             <label className="bs-label">Enter Text Report Name</label>
             <input className="bs-input bs-input-wide" name="textReportName"
@@ -153,22 +257,73 @@ function BalanceSheet() {
               value={form.textReportName} onChange={handleChange} />
           </div>
 
-          {/* CONDITIONAL BUTTONS */}
+          {/* Error / Loading */}
+          {error   && <p className="bs-error">{error}</p>}
+          {loading && (
+            <div className="bs-loading-bar">
+              <div className="bs-loading-fill" />
+            </div>
+          )}
+
+          {/* Buttons */}
           <div className="bs-btn-row">
-            <button className="bs-btn" onClick={() => alert("Show")}>Show</button>
-            <button className="bs-btn" onClick={() => alert("Balance Sheet Report")}>Balance Sheet Report</button>
-            {isSingleDate && (
-              <button className="bs-btn" onClick={() => alert("Report with Working Day")}>Report with Working Day</button>
-            )}
-            <button className="bs-btn" onClick={() => alert("Text Report View")}>Text Report View</button>
-            {isSingleDate && (
-              <button className="bs-btn" onClick={() => alert("Balancesheet Summary")}>Balancesheet Summary</button>
-            )}
+            {(buttons[form.reportType] || []).map(({ label, action }) => (
+              <button
+                key={action}
+                className={`bs-btn${activeAction === action && fetched ? " bs-btn-active" : ""}`}
+                onClick={() => callAPI(action)}
+                disabled={loading}
+              >
+                {loading && activeAction === action ? "Loading…" : label}
+              </button>
+            ))}
+            <button className="bs-btn bs-btn-print" onClick={handlePrint} disabled={loading}>
+              Print
+            </button>
           </div>
 
         </div>
-
       </div>
+
+      {/* ── Print header ── */}
+      {fetched && reportData.length > 0 && (
+        <div className="bs-table-wrapper">
+          <div className="print-only bs-print-header">
+            <h2>{form.textReportName || "Balance Sheet Report"}</h2>
+            <p>
+              Branch: {form.branchCode} &nbsp;|&nbsp;
+              Report: {form.reportType} &nbsp;|&nbsp;
+              Action: {activeAction} &nbsp;|&nbsp;
+              Date Printed: {new Date().toLocaleDateString()}
+            </p>
+          </div>
+
+          <table className="bs-table">
+            <thead>
+              <tr>
+                {columns.map((col) => <th key={col}>{col}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {reportData.map((row, i) => (
+                <tr key={i}>
+                  {columns.map((col) => <td key={col}>{row[col] ?? ""}</td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <p className="bs-record-count no-print">
+            Total Records: {reportData.length}
+          </p>
+        </div>
+      )}
+
+      {fetched && reportData.length === 0 && !loading && (
+        <p className="bs-error no-print" style={{ margin: "16px" }}>
+          No records found for the given criteria.
+        </p>
+      )}
     </div>
   );
 }

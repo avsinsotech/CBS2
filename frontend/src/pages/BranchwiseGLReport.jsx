@@ -1,31 +1,168 @@
+
+
+
 import { useState } from "react";
 import "./BranchwiseGLReport.css";
 
+const API_BASE_URL = "http://localhost:5000";
+
+// ─── date helper ─────────────────────────────────────────────
+// DD/MM/YYYY → YYYY-MM-DD  (what this backend expects per swagger)
+function toISO(raw) {
+  const parts = raw.trim().split("/");
+  if (parts.length !== 3) return null;
+  let [d, m, y] = parts;
+  if (y.length === 2) y = "20" + y;
+  return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+
+function isValidDate(raw) {
+  const parts = raw.trim().split("/");
+  if (parts.length !== 3) return false;
+  const [d, m] = parts.map(Number);
+  return d >= 1 && d <= 31 && m >= 1 && m <= 12;
+}
+
+// ─── component ───────────────────────────────────────────────
 function BranchwiseGLReport() {
   const [form, setForm] = useState({
-    reportType: "",
-    branchCode: "1",
+    reportType:  "Details",
+    branchCode:  "1",
     productType: "",
     productName: "",
-    fromDate: "01/04/2025",
-    toDate: "30/03/2026"
+    subGLCode:   "",
+    fromDate:    "01/04/2025",
+    toDate:      "30/03/2026",
   });
 
+  const [reportData,   setReportData]   = useState([]);
+  const [columns,      setColumns]      = useState([]);
+  const [loading,      setLoading]      = useState(false);
+  const [error,        setError]        = useState("");
+  const [fetched,      setFetched]      = useState(false);
+  const [activeAction, setActiveAction] = useState("");
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    setFetched(false);
+    setError("");
   };
+
+  // ── validate ──────────────────────────────────────────────
+  function validate(action) {
+    if (!form.branchCode.trim()) return "Branch Code is required.";
+    if (!isValidDate(form.fromDate)) return "From Date must be in DD/MM/YYYY format.";
+    if (!isValidDate(form.toDate))   return "To Date must be in DD/MM/YYYY format.";
+
+    if (action === "Report Print" || action === "Opening Closing Details") {
+      if (!form.productType.trim()) return "Product Type is required for Details report.";
+    }
+    if (action === "DateWise" || action === "Summary") {
+      if (!form.subGLCode.trim()) return "Sub GL Code is required for DateWise / Summary.";
+    }
+    return null;
+  }
+
+  // ── build URL ─────────────────────────────────────────────
+  function buildURL(action) {
+    const fromISO = toISO(form.fromDate);
+    const toISO_  = toISO(form.toDate);
+
+    if (action === "Report Print") {
+      const p = new URLSearchParams({
+        Brcd: form.branchCode.trim(),
+        pat:  form.productType.trim(),
+        PFDT: fromISO,
+        PTDT: toISO_,
+      });
+      return `${API_BASE_URL}/api/branch-wise-gl/details?${p}`;
+    }
+
+    if (action === "Opening Closing Details") {
+      const p = new URLSearchParams({
+        Brcd: form.branchCode.trim(),
+        pat:  form.productType.trim(),
+        PFDT: fromISO,
+        PTDT: toISO_,
+      });
+      return `${API_BASE_URL}/api/branch-wise-gl/details-opening-closing?${p}`;
+    }
+
+    if (action === "DateWise") {
+      const p = new URLSearchParams({
+        Brcd:      form.branchCode.trim(),
+        SubGlCode: form.subGLCode.trim(),
+        FromDate:  fromISO,
+        ToDate:    toISO_,
+      });
+      return `${API_BASE_URL}/api/branch-wise-gl/datewise?${p}`;
+    }
+
+    if (action === "Summary") {
+      const p = new URLSearchParams({
+        Brcd:      form.branchCode.trim(),
+        SubGlCode: form.subGLCode.trim(),
+        FromDate:  fromISO,
+        ToDate:    toISO_,
+      });
+      return `${API_BASE_URL}/api/branch-wise-gl/summary?${p}`;
+    }
+
+    return null;
+  }
+
+  // ── fetch ─────────────────────────────────────────────────
+  const callAPI = async (action) => {
+    const validErr = validate(action);
+    if (validErr) { setError(validErr); return null; }
+
+    const url = buildURL(action);
+    if (!url) { setError("Unknown action."); return null; }
+
+    setLoading(true);
+    setError("");
+    setFetched(false);
+    setActiveAction(action);
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Server error: ${res.status}`);
+      }
+      const data = await res.json();
+      setColumns(data.length > 0 ? Object.keys(data[0]) : []);
+      setReportData(data);
+      setFetched(true);
+      return data;
+    } catch (err) {
+      setError(err.message || "Failed to fetch report.");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrint = async () => {
+    const action = form.reportType === "Details" ? "Report Print"
+                 : form.reportType === "DateWise" ? "DateWise"
+                 : "Summary";
+    const data = fetched ? reportData : await callAPI(action);
+    if (data && data.length > 0) setTimeout(() => window.print(), 400);
+  };
+
+  // ── which fields to show ──────────────────────────────────
+  const showProductFields = form.reportType === "Details";
+  const showSubGLField    = form.reportType === "DateWise" || form.reportType === "Summary";
 
   return (
     <div className="bgl-wrapper">
-      <div className="bgl-card">
-
-        {/* HEADER */}
+      <div className="bgl-card no-print">
         <div className="bgl-header">BranchWise GL Report</div>
 
-        {/* FORM SECTION */}
         <div className="bgl-form-section">
 
-          {/* REPORT TYPE RADIOS */}
+          {/* Report type radios */}
           <div className="bgl-radio-row">
             {["Details", "DateWise", "Summary"].map((opt) => (
               <label key={opt} className="bgl-radio-label">
@@ -36,45 +173,122 @@ function BranchwiseGLReport() {
             ))}
           </div>
 
-          {/* BRANCH CODE */}
+          {/* Branch Code */}
           <div className="bgl-row">
-            <label className="bgl-label">Branch Code : <span className="req">*</span></label>
+            <label className="bgl-label">Branch Code <span className="req">*</span></label>
             <input className="bgl-input bgl-input-shaded" name="branchCode"
               value={form.branchCode} onChange={handleChange} />
           </div>
 
-          {/* PRODUCT TYPE + PRODUCT NAME */}
+          {/* Product Type + Name — Details only */}
+          {showProductFields && (
+            <div className="bgl-row">
+              <label className="bgl-label">Product Type <span className="req">*</span></label>
+              <input className="bgl-input" name="productType"
+                placeholder="e.g. S" value={form.productType} onChange={handleChange} />
+              <input className="bgl-input bgl-input-wide" name="productName"
+                placeholder="Product Name (display only)" value={form.productName} onChange={handleChange} />
+            </div>
+          )}
+
+          {/* Sub GL Code — DateWise / Summary only */}
+          {showSubGLField && (
+            <div className="bgl-row">
+              <label className="bgl-label">Sub GL Code <span className="req">*</span></label>
+              <input className="bgl-input" name="subGLCode"
+                placeholder="e.g. 101" value={form.subGLCode} onChange={handleChange} />
+            </div>
+          )}
+
+          {/* From / To Date */}
           <div className="bgl-row">
-            <label className="bgl-label">Product Type : <span className="req">*</span></label>
-            <input className="bgl-input" name="productType"
-              placeholder="Product Type" value={form.productType} onChange={handleChange} />
-            <input className="bgl-input bgl-input-wide" name="productName"
-              placeholder="Product Name" value={form.productName} onChange={handleChange} />
+            <label className="bgl-label">From Date <span className="req">*</span></label>
+            <input className="bgl-input" name="fromDate"
+              value={form.fromDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+            <label className="bgl-inline-label">To Date <span className="req">*</span></label>
+            <input className="bgl-input" name="toDate"
+              value={form.toDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
           </div>
 
-          {/* FROM DATE + TO DATE */}
-          <div className="bgl-row">
-            <label className="bgl-label">From Date : <span className="req">*</span></label>
-            <input className="bgl-input" name="fromDate"
-              value={form.fromDate} onChange={handleChange} />
-            <label className="bgl-inline-label">To Date : <span className="req">*</span></label>
-            <input className="bgl-input" name="toDate"
-              value={form.toDate} onChange={handleChange} />
-          </div>
+          {/* Error */}
+          {error && <p className="bgl-error">{error}</p>}
+
+          {/* Loading bar */}
+          {loading && (
+            <div className="bgl-loading-bar">
+              <div className="bgl-loading-fill" />
+            </div>
+          )}
 
         </div>
 
-        {/* FOOTER */}
+        {/* Footer buttons */}
         <div className="bgl-footer">
-          <button className="bgl-btn" onClick={() => window.print()}>Report Print</button>
           {form.reportType === "Details" && (
-            <button className="bgl-btn" onClick={() => alert("Opening Closing Details")}>
-              Opening Closing Details
+            <>
+              <button className={`bgl-btn${activeAction === "Report Print" && fetched ? " bgl-btn-active" : ""}`}
+                onClick={() => callAPI("Report Print")} disabled={loading}>
+                {loading && activeAction === "Report Print" ? "Loading…" : "Report Print"}
+              </button>
+              <button className={`bgl-btn${activeAction === "Opening Closing Details" && fetched ? " bgl-btn-active" : ""}`}
+                onClick={() => callAPI("Opening Closing Details")} disabled={loading}>
+                {loading && activeAction === "Opening Closing Details" ? "Loading…" : "Opening Closing Details"}
+              </button>
+            </>
+          )}
+          {form.reportType === "DateWise" && (
+            <button className={`bgl-btn${activeAction === "DateWise" && fetched ? " bgl-btn-active" : ""}`}
+              onClick={() => callAPI("DateWise")} disabled={loading}>
+              {loading && activeAction === "DateWise" ? "Loading…" : "DateWise Report"}
             </button>
           )}
+          {form.reportType === "Summary" && (
+            <button className={`bgl-btn${activeAction === "Summary" && fetched ? " bgl-btn-active" : ""}`}
+              onClick={() => callAPI("Summary")} disabled={loading}>
+              {loading && activeAction === "Summary" ? "Loading…" : "Summary Report"}
+            </button>
+          )}
+          <button className="bgl-btn bgl-btn-print" onClick={handlePrint} disabled={loading}>
+            Print
+          </button>
         </div>
-
       </div>
+
+      {/* Results table */}
+      {fetched && reportData.length > 0 && (
+        <div className="bgl-table-wrapper">
+          <div className="print-only bgl-print-header">
+            <h2>BranchWise GL Report — {form.reportType}</h2>
+            <p>
+              Branch: {form.branchCode} &nbsp;|&nbsp;
+              From: {form.fromDate} &nbsp;|&nbsp;
+              To: {form.toDate} &nbsp;|&nbsp;
+              Date Printed: {new Date().toLocaleDateString()}
+            </p>
+          </div>
+
+          <table className="bgl-table">
+            <thead>
+              <tr>{columns.map((col) => <th key={col}>{col}</th>)}</tr>
+            </thead>
+            <tbody>
+              {reportData.map((row, i) => (
+                <tr key={i}>
+                  {columns.map((col) => <td key={col}>{row[col] ?? ""}</td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <p className="bgl-record-count no-print">Total Records: {reportData.length}</p>
+        </div>
+      )}
+
+      {fetched && reportData.length === 0 && !loading && (
+        <p className="bgl-error no-print" style={{ margin: "16px" }}>
+          No records found for the given criteria.
+        </p>
+      )}
     </div>
   );
 }

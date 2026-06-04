@@ -1,0 +1,28 @@
+@import "./DailyDaybook.css";
+
+.dpr-radio-label {
+  min-width: 160px;
+}
+
+.dpr-input-wide {
+  width: 340px;
+}
+
+.dpr-result-wrapper {
+  margin-top: 24px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dpr-result-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7c3aed;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+}

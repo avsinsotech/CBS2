@@ -1,15 +1,8 @@
-# Build archives
-*.zip
-*.rar
-*.tar.gz
-
-# Node modules
 node_modules/
-
-# Environment files
+dist/
+build/
 .env
-.env.*
-.local
-
-# Logs
-*.log
+.DS_Store
+.vscode/
+npm-debug.log
+yarn-error.log
