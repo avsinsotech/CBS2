@@ -33,6 +33,7 @@ const branchWiseDepositLoansRoutes = require('./routes/branchWiseDepositLoans');
 const dailyBalLessThanClgRoutes = require('./routes/dailyBalLessThanClg');
 const tdsReportRoutes = require('./routes/tdsReport');
 const chairmanReportRoutes = require('./routes/chairmanReport');
+const loanAgainstFDRoutes = require('./routes/loanAgainstFD');
 
 
 
@@ -89,6 +90,7 @@ app.use('/api/branchwise-deposit-loans', branchWiseDepositLoansRoutes);
 app.use('/api/daily-balance-less-than-clg', dailyBalLessThanClgRoutes);
 app.use('/api/tds-report', tdsReportRoutes);
 app.use('/api/chairman-report', chairmanReportRoutes);
+app.use('/api/loan-against-fd', loanAgainstFDRoutes);
 
 
 
