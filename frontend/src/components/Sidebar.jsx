@@ -22,82 +22,92 @@ import "../styles/sidebar.css";
 // ── Tabler icon map ───────────────────────────────────────────────────────────
 const subItemIconMap = {
   // General Ledger
-  "GL-Report":                  "ti-report-analytics",
-  "A/C Balance Register":       "ti-receipt",
-  "Genral Ledger Wise":         "ti-list-details",
-  "Profit And Loss":            "ti-trending-up",
-  "General Ledger":             "ti-book",
-  "Trial Balance":              "ti-scale",
-  "Balance sheet":              "ti-building-bank",
-  "Branchwise GL Report":       "ti-git-branch",
-  "Recipt Payment Report":      "ti-file-invoice",
+  "GL-Report": "ti-report-analytics",
+  "A/C Balance Register": "ti-receipt",
+  "Genral Ledger Wise": "ti-list-details",
+  "Profit And Loss": "ti-trending-up",
+  "General Ledger": "ti-book",
+  "Trial Balance": "ti-scale",
+  "Balance sheet": "ti-building-bank",
+  "Branchwise GL Report": "ti-git-branch",
+  "Recipt Payment Report": "ti-file-invoice",
   "Receipt & Payment With Bal": "ti-coins",
-  "Branch Adjustment":          "ti-adjustments-horizontal",
+  "Branch Adjustment": "ti-adjustments-horizontal",
   // Daily
-  "Cashbook":                   "ti-bookmarks",
-  "Daybook":                    "ti-calendar",
-  "vouchersub bOOK":            "ti-file-invoice",
-  "Voucher Printing":           "ti-printer",
-  "Daily Position Report":      "ti-report",
-  "scroll printing":            "ti-scroll",
-  "debit entry report":         "ti-file-minus",
-  "unpass entires":             "ti-file-x",
-  "supplementary report":       "ti-file-plus",
-  "Audit trial report":         "ti-shield-check",
-  "AML Alert":                  "ti-alert-triangle",
+  "Cashbook": "ti-bookmarks",
+  "Daybook": "ti-calendar",
+  "vouchersub bOOK": "ti-file-invoice",
+  "Voucher Printing": "ti-printer",
+  "Daily Position Report": "ti-report",
+  "scroll printing": "ti-scroll",
+  "debit entry report": "ti-file-minus",
+  "unpass entires": "ti-file-x",
+  "supplementary report": "ti-file-plus",
+  "Audit trial report": "ti-shield-check",
+  "AML Alert": "ti-alert-triangle",
   // Monthly
-  "Loan & Deposit Register":    "ti-report-analytics",
-  "Cut Book":                   "ti-scissors",
-  "Document Register":          "ti-files",
-  "CTR Reports":                "ti-file-description",
-  "KYC Reports":                "ti-id-badge",
-  "CD Ratio Report":            "ti-chart-bar",
-  "SMS Report":                 "ti-message",
-  "SI Report":                  "ti-repeat",
-  "Acc Open Close Report":      "ti-door",
-  "Monthly Deposit/Loans":      "ti-building-bank",
-  "InOperative Acc List":       "ti-list",
-  "Daily Bal Less Than Clg":    "ti-trending-down",
-  "TDS Report":                 "ti-receipt-tax",
-  "CRR / SLR Report":           "ti-percentage",
-  "CRARReport":                 "ti-chart-pie",
+  "Loan & Deposit Register": "ti-report-analytics",
+  "Cut Book": "ti-scissors",
+  "Document Register": "ti-files",
+  "CTR Reports": "ti-file-description",
+  "KYC Reports": "ti-id-badge",
+  "CD Ratio Report": "ti-chart-bar",
+  "SMS Report": "ti-message",
+  "SI Report": "ti-repeat",
+  "Acc Open Close Report": "ti-door",
+  "Monthly Deposit/Loans": "ti-building-bank",
+  "InOperative Acc List": "ti-list",
+  "Daily Bal Less Than Clg": "ti-trending-down",
+  "TDS Report": "ti-receipt-tax",
+  "CRR / SLR Report": "ti-percentage",
+  "CRARReport": "ti-chart-pie",
 };
 
 // ── Route map ─────────────────────────────────────────────────────────────────
 const subRouteMap = {
   // General Ledger
-  "General_Ledger__GL-Report":                  "/reports/general-ledger/gl-report",
-  "General_Ledger__A/C Balance Register":       "/reports/general-ledger/ac-balance-register",
-  "General_Ledger__Genral Ledger Wise":         "/reports/general-ledger/ledger-wise",
-  "General_Ledger__Profit And Loss":            "/reports/general-ledger/profit-and-loss",
-  "General_Ledger__General Ledger":             "/reports/general-ledger/general-ledger",
-  "General_Ledger__Trial Balance":              "/reports/general-ledger/trial-balance",
-  "General_Ledger__Balance sheet":              "/reports/general-ledger/balance-sheet",
-  "General_Ledger__Branchwise GL Report":       "/reports/general-ledger/branchwise-gl-report",
-  "General_Ledger__Recipt Payment Report":      "/reports/general-ledger/receipt-payment-report",
+  "General_Ledger__GL-Report": "/reports/general-ledger/gl-report",
+  "General_Ledger__A/C Balance Register": "/reports/general-ledger/ac-balance-register",
+  "General_Ledger__Genral Ledger Wise": "/reports/general-ledger/ledger-wise",
+  "General_Ledger__Profit And Loss": "/reports/general-ledger/profit-and-loss",
+  "General_Ledger__General Ledger": "/reports/general-ledger/general-ledger",
+  "General_Ledger__Trial Balance": "/reports/general-ledger/trial-balance",
+  "General_Ledger__Balance sheet": "/reports/general-ledger/balance-sheet",
+  "General_Ledger__Branchwise GL Report": "/reports/general-ledger/branchwise-gl-report",
+  "General_Ledger__Recipt Payment Report": "/reports/general-ledger/receipt-payment-report",
   "General_Ledger__Receipt & Payment With Bal": "/reports/general-ledger/receipt-payment-with-bal",
-  "General_Ledger__Branch Adjustment":          "/reports/general-ledger/branch-adjustment",
+  "General_Ledger__Branch Adjustment": "/reports/general-ledger/branch-adjustment",
   // Daily
-  "Daily__Cashbook":            "/reports/daily/cashbook",
-  "Daily__Daybook":             "/reports/daily/daybook",
-  "Daily__vouchersub bOOK":     "/reports/daily/vouchersub-book",
+  "Daily__Cashbook": "/reports/daily/cashbook",
+  "Daily__Daybook": "/reports/daily/daybook",
+  "Daily__vouchersub bOOK": "/reports/daily/vouchersub-book",
   // Monthly — no leading slash so navigate() stays inside Layout
   "Monthly__Loan & Deposit Register": "loan-deposit-register",
-  "Monthly__Cut Book":                "cut-book",
-  "Monthly__Document Register":       "document-register",
-  "Monthly__CTR Reports":             "ctr-report",
-  "Monthly__KYC Reports":             "kyc-report",
-  "Monthly__CD Ratio Report":         "cd-ratio-report",
-  "Monthly__SMS Report":              "sms-report",
-  "Monthly__SI Report":               "si-report",
-  "Monthly__Acc Open Close Report":   "reports/account-open-close",
-  "Monthly__Monthly Deposit/Loans":   "reports/branch-wise-deposit-loans",
-  "Monthly__InOperative Acc List":    "inoperative-acc-list",
+  "Monthly__Cut Book": "cut-book",
+  "Monthly__Document Register": "document-register",
+  "Monthly__CTR Reports": "ctr-report",
+  "Monthly__KYC Reports": "kyc-report",
+  "Monthly__CD Ratio Report": "cd-ratio-report",
+  "Monthly__SMS Report": "sms-report",
+  "Monthly__SI Report": "si-report",
+  "Monthly__Acc Open Close Report": "reports/account-open-close",
+  "Monthly__Monthly Deposit/Loans": "reports/branch-wise-deposit-loans",
+  "Monthly__InOperative Acc List": "inoperative-acc-list",
   "Monthly__Daily Bal Less Than Clg": "daily-bal-less-than-clg",
-  "Monthly__TDS Report":              "tds-report",
-  "Monthly__CRR / SLR Report":        "crr-slr-report",
-  "Monthly__CRARReport":              "crar-report",
+  "Monthly__TDS Report": "tds-report",
+  "Monthly__CRR / SLR Report": "crr-slr-report",
+  "Monthly__CRARReport": "crar-report",
+  "Monthly_Reporting__Chairman Report": "chairman-report",
+  "Monthly_Reporting__loan Against FD": "loan-against-fd",
+  "Monthly_Reporting__Gold Loan Sanction": "gold-loan-sanction",
+  "Monthly_Reporting__All Ok Report": "all-ok-report",
+  "Monthly_Reporting__Deposit & Loan Statement": "deposit-loan-statement",
+  "Monthly_Reporting__Loan Summary": "loan-summary",
+  "Monthly_Reporting__Loan Defaulter List": "loan-defaulter-list",
+  "Monthly_Reporting__Rate Wise-Deposit & Loan": "rate-wise-deposit-loan",
+  "Monthly_Reporting__Trial Balance": "trial-balance",
 };
+
 
 // ── Menu data ─────────────────────────────────────────────────────────────────
 const menuItems = [
@@ -156,7 +166,7 @@ const menuItems = [
     title: "REPORTS",
     icon: <FaFileAlt />,
     submenu: [
-      { label: "Customer_Reports",     children: [] },
+      { label: "Customer_Reports", children: [] },
       {
         label: "Daily",
         children: [
@@ -173,13 +183,13 @@ const menuItems = [
           "AML Alert",
         ]
       },
-      { label: "Cash",                 children: [] },
-      { label: "Share_Reports",        children: [] },
-      { label: "Term_Deposit",         children: [] },
-      { label: "Term_Loan",            children: [] },
-      { label: "Clearing_Reports",     children: [] },
-      { label: "Lockers",              children: [] },
-      { label: "Yearly",               children: [] },
+      { label: "Cash", children: [] },
+      { label: "Share_Reports", children: [] },
+      { label: "Term_Deposit", children: [] },
+      { label: "Term_Loan", children: [] },
+      { label: "Clearing_Reports", children: [] },
+      { label: "Lockers", children: [] },
+      { label: "Yearly", children: [] },
       {
         label: "Monthly",
         children: [
@@ -217,10 +227,22 @@ const menuItems = [
           "Branch Adjustment",
         ]
       },
-      { label: "Saving",               children: [] },
-      { label: "Monthly_Reporting",    children: [] },
-      { label: "Certificate",          children: [] },
-      { label: "GOI Security",         children: [] },
+      { label: "Saving", children: [] },
+      {
+        label: "Monthly_Reporting", children: [
+          "Chairman Report",
+          "loan Against FD",
+          "Gold Loan Sanction",
+          "All Ok Report",
+          "Deposit & Loan Statement",
+          "Loan Summary",
+          "Loan Defaulter List",
+          "Rate Wise-Deposit & Loan",
+          "Trial Balance",
+        ]
+      },
+      { label: "Certificate", children: [] },
+      { label: "GOI Security", children: [] },
     ]
   },
   {
@@ -323,7 +345,7 @@ const menuItems = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 function Sidebar() {
-  const [openMenu, setOpenMenu]       = useState("MASTER");
+  const [openMenu, setOpenMenu] = useState("MASTER");
   const [openSubMenu, setOpenSubMenu] = useState(null);
   const [activeChild, setActiveChild] = useState(null);
   const navigate = useNavigate();
@@ -339,7 +361,7 @@ function Sidebar() {
   };
 
   const handleChildClick = (parentLabel, childLabel) => {
-    const key  = `${parentLabel}__${childLabel}`;
+    const key = `${parentLabel}__${childLabel}`;
     const path = subRouteMap[key];
     setActiveChild(key);
     if (path) navigate(path);
@@ -386,8 +408,8 @@ function Sidebar() {
                   <ul className="submenu">
                     {item.submenu.map((sub, i) => {
                       const hasChildren = sub.children && sub.children.length > 0;
-                      const subKey      = `${item.title}__${sub.label}`;
-                      const isSubOpen   = openSubMenu === subKey;
+                      const subKey = `${item.title}__${sub.label}`;
+                      const isSubOpen = openSubMenu === subKey;
 
                       return (
                         <li key={i}>
@@ -408,10 +430,10 @@ function Sidebar() {
                           {hasChildren && isSubOpen && (
                             <ul className="sub-submenu">
                               {sub.children.map((child, j) => {
-                                const childKey  = `${sub.label}__${child}`;
+                                const childKey = `${sub.label}__${child}`;
                                 const iconClass = subItemIconMap[child] || "ti-file-text";
-                                const isActive  = activeChild === childKey;
-                                const hasRoute  = !!subRouteMap[childKey];
+                                const isActive = activeChild === childKey;
+                                const hasRoute = !!subRouteMap[childKey];
 
                                 return (
                                   <li
@@ -419,7 +441,7 @@ function Sidebar() {
                                     className={`sub-submenu-item ${isActive ? "active-sub" : ""}`}
                                     onClick={() => handleChildClick(sub.label, child)}
                                     style={{
-                                      cursor:  hasRoute ? "pointer" : "default",
+                                      cursor: hasRoute ? "pointer" : "default",
                                       opacity: hasRoute ? 1 : 0.6,
                                     }}
                                   >
