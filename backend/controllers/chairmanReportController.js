@@ -34,7 +34,9 @@ const executeChairmanReport = async (req, res) => {
         const responseMode = req.query.mode || req.body.mode || 'json';
 
         const pool = await poolPromise;
-        const result = await pool.request()
+        const request = pool.request();
+        request.timeout = 600000; // 10 minutes
+        const result = await request
             .input('BrCode', sql.VarChar(60), branchCode)
             .input('Asondate', sql.DateTime, new Date(asOnDate))
             .execute('RptChairmanReport_Yearly');
