@@ -36,6 +36,7 @@ const chairmanReportRoutes = require('./routes/chairmanReport');
 const loanAgainstFDRoutes = require('./routes/loanAgainstFD');
 const goldLoanSanctionRoutes = require('./routes/goldLoanSanction');
 const depositLoanStatementRoutes = require('./routes/depositLoanStatement');
+const rateWiseDepositLoanRoutes = require('./routes/rateWiseDepositLoan');
 
 
 
@@ -95,6 +96,7 @@ app.use('/api/chairman-report', chairmanReportRoutes);
 app.use('/api/loan-against-fd', loanAgainstFDRoutes);
 app.use('/api/gold-loan-sanction', goldLoanSanctionRoutes);
 app.use('/api/deposit-loan-statement', depositLoanStatementRoutes);
+app.use('/api/rate-wise-deposit-loan', rateWiseDepositLoanRoutes);
 
 
 

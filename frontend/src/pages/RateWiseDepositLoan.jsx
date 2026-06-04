@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const HEADER_COLOR = "#334155";
 
 export default function RateWiseDepositLoan() {
@@ -21,16 +22,42 @@ export default function RateWiseDepositLoan() {
     setResults(null);
     setLoading(true);
     try {
-      // Replace with actual API call e.g.:
-      // const data = await fetchRateWiseDepositLoan({ reportType, fromBrcd, toBrcd, productCodeFrom, productCodeTo, asOnDate, fromIntRate, toIntRate });
-      // setResults(data);
-      await new Promise((r) => setTimeout(r, 800));
-      setResults({ data: [], rowCount: 0 });
+      const params = new URLSearchParams({
+        fromBr: fromBrcd || '1',
+        toBr: toBrcd || '2',
+        productCode: productCodeFrom || '1',
+        asOnDate: asOnDate || '2026-05-22',
+        fromIntRate: fromIntRate || '0',
+        toIntRate: toIntRate || '999999',
+        mode: 'json'
+      });
+      const response = await fetch(`${BASE_URL}/api/rate-wise-deposit-loan?${params}`);
+      const ct = response.headers.get("content-type") || "";
+      if (!ct.includes("application/json")) {
+        const txt = await response.text();
+        throw new Error(`Server error (HTTP ${response.status}): ${txt.substring(0, 200)}`);
+      }
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "API request failed");
+      setResults(data);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePrintReport = () => {
+    const params = new URLSearchParams({
+      fromBr: fromBrcd || '1',
+      toBr: toBrcd || '2',
+      productCode: productCodeFrom || '1',
+      asOnDate: asOnDate || '2026-05-22',
+      fromIntRate: fromIntRate || '0',
+      toIntRate: toIntRate || '999999',
+      mode: 'text'
+    });
+    window.open(`${BASE_URL}/api/rate-wise-deposit-loan?${params}`, "_blank");
   };
 
   const handleClear = () => {
@@ -146,7 +173,10 @@ export default function RateWiseDepositLoan() {
         {/* Buttons */}
         <div style={s.btnRow}>
           <button style={s.btn} onClick={handleReportPrint} disabled={loading}>
-            {loading ? "Loading..." : "Report Print"}
+            {loading ? "Loading..." : "Report View"}
+          </button>
+          <button style={s.btn} onClick={handlePrintReport} disabled={loading}>
+            Report Print
           </button>
           <button style={s.btnSecondary} onClick={handleClear}>Clear</button>
         </div>
