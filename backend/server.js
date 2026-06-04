@@ -37,6 +37,7 @@ const loanAgainstFDRoutes = require('./routes/loanAgainstFD');
 const goldLoanSanctionRoutes = require('./routes/goldLoanSanction');
 const depositLoanStatementRoutes = require('./routes/depositLoanStatement');
 const rateWiseDepositLoanRoutes = require('./routes/rateWiseDepositLoan');
+const trialBalanceRoutes = require('./routes/trialBalance');
 
 
 
@@ -97,6 +98,7 @@ app.use('/api/loan-against-fd', loanAgainstFDRoutes);
 app.use('/api/gold-loan-sanction', goldLoanSanctionRoutes);
 app.use('/api/deposit-loan-statement', depositLoanStatementRoutes);
 app.use('/api/rate-wise-deposit-loan', rateWiseDepositLoanRoutes);
+app.use('/api/trial-balance', trialBalanceRoutes);
 
 
 
