@@ -8,7 +8,9 @@ const executeCdRatioReport = async (req, res, responseMode = 'json') => {
         const flag1 = req.body.flag1 !== undefined ? req.body.flag1 : (req.query.flag1 !== undefined ? req.query.flag1 : '');
 
         const pool = await poolPromise;
-        const result = await pool.request()
+        const request = pool.request();
+        request.timeout = 600000; // 10 minutes
+        const result = await request
             .input('Flag', sql.VarChar(100), flag)
             .input('SFlag', sql.VarChar(100), null)
             .input('Brcd', sql.VarChar(10), brcd)
