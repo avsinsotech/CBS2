@@ -25,19 +25,26 @@ const executeGoldLoanSanction = async (req, res) => {
         responseMode       = req.query.mode         || req.body.mode         || 'json';
 
         const fl = flagMap[reportType] || 'DT';
+        const valuationRate = req.query.valuationRate || req.body.valuationRate || '';
 
         const pool = await poolPromise;
         const request = pool.request();
         request.timeout = 600000; // 10 minutes
-        const result = await request
-            .input('FBRCD',   sql.VarChar(10), fromBrcd)
-            .input('TBRCD',   sql.VarChar(10), toBrcd)
-            .input('PrdCode', sql.VarChar(10), '204')
-            .input('FDT',     sql.VarChar(20), fromDate)
-            .input('TDT',     sql.VarChar(20), toDate)
-            .input('EDATE',   sql.VarChar(20), toDate)
-            .input('FL',      sql.VarChar(10), fl)
-            .execute('Isp_AVS0041');
+        request.input('FBRCD',   sql.VarChar(10), fromBrcd);
+        request.input('TBRCD',   sql.VarChar(10), toBrcd);
+        request.input('PrdCode', sql.VarChar(10), '204');
+        request.input('FDT',     sql.VarChar(20), fromDate);
+        request.input('TDT',     sql.VarChar(20), toDate);
+        request.input('EDATE',   sql.VarChar(20), toDate);
+        request.input('FL',      sql.VarChar(10), fl);
+
+        let result;
+        if (responseMode === 'valuation') {
+            request.input('VRATE', sql.VarChar(20), valuationRate);
+            result = await request.execute('Isp_AVS0041_NewValuation');
+        } else {
+            result = await request.execute('Isp_AVS0041');
+        }
 
         const rows = result.recordset || result.recordsets?.[0] || [];
 
