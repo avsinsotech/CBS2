@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { fetchTdsReport } from "../api/api";
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -7,7 +6,7 @@ export default function TDSReport() {
   const [customerType,   setCustomerType]   = useState("All");
   const [branchCode,     setBranchCode]     = useState("0000");
   const [fromDate,       setFromDate]       = useState("2025-04-01");
-  const [toDate,         setToDate]         = useState("2025-07-26");
+  const [toDate,         setToDate]         = useState("2026-03-30");
   const [fromCustomerID, setFromCustomerID] = useState("1");
   const [toCustomerID,   setToCustomerID]   = useState("999999999");
   const [customerID,     setCustomerID]     = useState("");
@@ -20,7 +19,7 @@ export default function TDSReport() {
   const handleClear = () => {
     setBranchCode("0000");
     setFromDate("2025-04-01");
-    setToDate("2025-07-26");
+    setToDate("2026-03-30");
     setCustomerType("All");
     setFromCustomerID("1");
     setToCustomerID("999999999");
@@ -35,78 +34,6 @@ export default function TDSReport() {
     fromCustNo: customerType === "Specific" ? customerID : fromCustomerID,
     toCustNo:   customerType === "Specific" ? customerID : toCustomerID,
   });
-
-  // ── TDS Details Report → JSON table ────────────────────────────────────────
-  const handleTdsReport = async () => {
-    if (!fromDate || !toDate) { setError("Please fill From Date and To Date."); return; }
-    if (customerType === "Specific" && !customerID.trim()) { setError("Please enter a Customer ID."); return; }
-
-    setLoading(true); setError(null); setResults(null); setActiveBtn("tds");
-
-    try {
-      const { fromCustNo, toCustNo } = getCustomerRange();
-      const response = await fetchTdsReport({
-        fromDate,
-        toDate,
-        branchCode,
-        fromCustNo,
-        toCustNo,
-        amount: "0",
-        flag: ""
-      });
-
-      if (response.success) {
-        setResults({
-          data: response.data,
-          rowCount: response.rowCount,
-          reportType: "TDS Details Report",
-          parameters: response.parameters
-        });
-      } else {
-        throw new Error(response.error || "Failed to retrieve TDS Details Report");
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ── Deposit Enquiry Report → JSON table ───────────────────────────────────
-  const handleDepositEnquiry = async () => {
-    if (!fromDate || !toDate) { setError("Please fill From Date and To Date."); return; }
-    if (customerType === "Specific" && !customerID.trim()) { setError("Please enter a Customer ID."); return; }
-
-    setLoading(true); setError(null); setResults(null); setActiveBtn("enquiry");
-
-    try {
-      const { fromCustNo, toCustNo } = getCustomerRange();
-      const response = await fetchTdsReport({
-        fromDate,
-        toDate,
-        branchCode,
-        fromCustNo,
-        toCustNo,
-        amount: "0",
-        flag: "Enquiry"
-      });
-
-      if (response.success) {
-        setResults({
-          data: response.data,
-          rowCount: response.rowCount,
-          reportType: "Deposit Enquiry Report",
-          parameters: response.parameters
-        });
-      } else {
-        throw new Error(response.error || "Failed to retrieve Deposit Enquiry Report");
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ── 15-G-H Submit Report → JSON table ──────────────────────────────────────
   const handle15GHReport = async () => {
@@ -206,16 +133,12 @@ export default function TDSReport() {
         {/* Buttons */}
         <div style={styles.btnRow}>
           <div style={styles.btnGroupLeft}>
-            <button style={styles.btnTeal} onClick={handleTdsReport} disabled={loading}>
-              {loading && activeBtn === "tds" ? "Loading..." : "Report"}
-            </button>
+            <button style={styles.btnTeal} disabled={loading}>Report</button>
             <button style={styles.btnTeal} onClick={handleClear}>Clear</button>
             <button style={styles.btnOutline}>Exit</button>
           </div>
           <div style={styles.btnGroupRight}>
-            <button style={styles.btnTeal} onClick={handleDepositEnquiry} disabled={loading}>
-              {loading && activeBtn === "enquiry" ? "Loading..." : "Deposit Enquiry"}
-            </button>
+            <button style={styles.btnTeal} disabled={loading}>Deposit Enquiry</button>
             {/* 15-G-H: click = JSON table, right-click/shift-click opens text view */}
             <button
               style={styles.btnTeal}
@@ -240,18 +163,12 @@ export default function TDSReport() {
         {loading && activeBtn === "15gh" && (
           <div style={styles.loadingBox}>⏳ Fetching 15-G-H Submit Report...</div>
         )}
-        {loading && activeBtn === "tds" && (
-          <div style={styles.loadingBox}>⏳ Fetching TDS Details Report...</div>
-        )}
-        {loading && activeBtn === "enquiry" && (
-          <div style={styles.loadingBox}>⏳ Fetching Deposit Enquiry Report...</div>
-        )}
 
         {/* Results Table */}
         {results && results.data && results.data.length > 0 && (
           <div style={styles.tableWrapper}>
             <div style={styles.tableHeader}>
-              {results.reportType || "15-G/H Submit Report"} — {results.rowCount} record(s) &nbsp;|&nbsp;
+              15-G/H Submit Report — {results.rowCount} record(s) &nbsp;|&nbsp;
               {results.parameters.fromDate} → {results.parameters.toDate} &nbsp;|&nbsp;
               Customer: {results.parameters.fromCustNo}→{results.parameters.toCustNo}
             </div>
@@ -279,7 +196,7 @@ export default function TDSReport() {
         )}
 
         {results && results.data && results.data.length === 0 && (
-          <div style={styles.noDataBox}>No records found for the selected criteria.</div>
+          <div style={styles.noDataBox}>No 15-G/H records found for the selected criteria.</div>
         )}
 
       </div>

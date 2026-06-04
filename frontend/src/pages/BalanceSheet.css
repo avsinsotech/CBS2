@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
+/* ─── wrapper ─────────────────────────────────────────── */
 .bs-wrapper {
   padding: 24px;
   background: #f0f2f5;
@@ -7,6 +8,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* ─── card ────────────────────────────────────────────── */
 .bs-card {
   background: #ffffff;
   border: 1.5px solid #d1d5db;
@@ -24,6 +26,7 @@
   letter-spacing: 0.4px;
 }
 
+/* ─── form section ────────────────────────────────────── */
 .bs-form-section {
   border: 1px solid #c8d8f0;
   border-radius: 4px;
@@ -81,6 +84,7 @@
 
 .bs-input-wide { width: 300px; }
 
+/* ─── radios / checkboxes ─────────────────────────────── */
 .bs-radio-row {
   display: flex;
   align-items: center;
@@ -123,6 +127,7 @@
   cursor: pointer;
 }
 
+/* ─── buttons ─────────────────────────────────────────── */
 .bs-btn-row {
   display: flex;
   align-items: center;
@@ -143,10 +148,211 @@
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.2s ease, transform 0.15s ease;
+  transition: opacity 0.2s ease, transform 0.15s ease, background 0.2s;
 }
 
-.bs-btn:hover {
+.bs-btn:hover:not(:disabled) {
   opacity: 0.88;
   transform: translateY(-1px);
+}
+
+.bs-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bs-btn-active {
+  background: #1a5fd4;
+  box-shadow: 0 0 0 3px rgba(79,124,255,0.25);
+}
+
+.bs-btn-print {
+  background: #374151;
+}
+
+/* ─── error / loading ─────────────────────────────────── */
+.bs-error {
+  font-size: 12.5px;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+.bs-loading-bar {
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bs-loading-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  border-radius: 2px;
+  animation: bs-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes bs-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* ─── table ───────────────────────────────────────────── */
+.bs-table-wrapper {
+  margin-top: 20px;
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 520px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.bs-table {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.bs-table thead {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.bs-table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.12);
+}
+
+.bs-table thead th:last-child { border-right: none; }
+
+.bs-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.12s;
+}
+
+.bs-table tbody tr:nth-child(even) { background: #f9fafb; }
+.bs-table tbody tr:hover           { background: #eff6ff; }
+
+.bs-table tbody td {
+  padding: 9px 14px;
+  color: #374151;
+  white-space: nowrap;
+  border-right: 1px solid #f3f4f6;
+}
+
+.bs-table tbody td:last-child { border-right: none; }
+
+/* ─── record count ────────────────────────────────────── */
+.bs-record-count {
+  font-size: 12px;
+  color: #6b7280;
+  padding: 10px 14px;
+  border-top: 1px solid #e5e7eb;
+  margin: 0;
+}
+
+/* ─── print ───────────────────────────────────────────── */
+.bs-print-header { display: none; }
+
+.print-only { display: none; }
+
+@media print {
+  .no-print   { display: none !important; }
+  .print-only { display: block !important; }
+
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html, body {
+    width: 100%;
+    overflow: visible !important;
+  }
+
+  .bs-wrapper { padding: 0; background: #fff; }
+
+  .bs-print-header {
+    display: block;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .bs-print-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #273449;
+    margin: 0 0 4px;
+  }
+
+  .bs-print-header p {
+    font-size: 10px;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .bs-table-wrapper {
+    border: none;
+    box-shadow: none;
+    margin-top: 0;
+    overflow: visible !important;
+    max-height: none !important;
+    width: 100% !important;
+  }
+
+  .bs-table {
+    width: 100% !important;
+    min-width: unset !important;
+    table-layout: auto;
+    font-size: 9px !important;
+  }
+
+  .bs-table thead {
+    background: #273449 !important;
+    position: static !important;
+  }
+
+  .bs-table thead th {
+    padding: 6px 6px !important;
+    font-size: 9px !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
+  .bs-table tbody td {
+    padding: 5px 6px !important;
+    font-size: 9px !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
+  .bs-table tbody tr:nth-child(even) {
+    background: #f3f4f6 !important;
+  }
+
+  .bs-record-count {
+    font-size: 10px;
+    padding: 6px;
+  }
 }
