@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+.rpb-wrapper {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 74px);
+  font-family: 'Poppins', sans-serif;
+}
+
+.rpb-card {
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.rpb-header {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 18px;
+  letter-spacing: 0.4px;
+}
+
+.rpb-form-section {
+  border: 1px solid #c8d8f0;
+  border-radius: 4px;
+  margin: 16px 16px 8px 16px;
+  padding: 20px 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rpb-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.rpb-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+.rpb-inline-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  margin-left: 32px;
+}
+
+.req {
+  color: #ef4444;
+}
+
+.rpb-radio-group {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.rpb-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rpb-radio-label input[type="radio"] {
+  accent-color: #273449;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.rpb-input {
+  height: 34px;
+  width: 200px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.rpb-input:focus {
+  border-color: #4f7cff;
+  box-shadow: 0 0 0 3px rgba(79,124,255,0.12);
+}
+
+.rpb-footer {
+  display: flex;
+  justify-content: center;
+  padding: 14px 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8f9fb;
+}
+
+.rpb-btn {
+  height: 36px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 4px;
+  background: #273449;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.rpb-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}

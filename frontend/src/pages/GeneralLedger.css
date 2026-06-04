@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+.gl-entry-wrapper {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 74px);
+  font-family: 'Poppins', sans-serif;
+}
+
+/* CARD */
+.gl-entry-card {
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* HEADER */
+.gl-entry-header {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 18px;
+  letter-spacing: 0.4px;
+}
+
+/* BODY */
+.gl-entry-body {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #c8d8f0;
+  margin: 16px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* 2-COLUMN GRID ROW */
+.gl-entry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 48px;
+}
+
+/* FIELD — label left, control right */
+.gl-entry-field {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.gl-entry-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+
+/* INPUT */
+.gl-entry-input {
+  height: 36px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.gl-entry-input::placeholder {
+  color: #9ca3af;
+}
+
+.gl-entry-input:focus {
+  border-color: #273449;
+  box-shadow: 0 0 0 3px rgba(79,124,255,0.12);
+}
+
+/* SELECT */
+.gl-entry-select {
+  height: 36px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 10px;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.gl-entry-select:focus {
+  border-color: #273449;
+  box-shadow: 0 0 0 3px rgba(79,124,255,0.12);
+}
+
+/* ACTIONS */
+.gl-entry-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* BUTTON */
+.gl-entry-btn {
+  height: 36px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 4px;
+  background: #273449;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.gl-entry-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}

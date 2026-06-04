@@ -1,0 +1,274 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+.acb-wrapper {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 74px);
+  font-family: 'Poppins', sans-serif;
+}
+
+/* CARD */
+.acb-card {
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* HEADER */
+.acb-header {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 18px;
+  letter-spacing: 0.4px;
+}
+
+/* BODY */
+.acb-body {
+  padding: 28px 32px 20px 32px;
+  background: #f8f9fb;
+}
+
+/* EACH ROW — 2 FIELDS SIDE BY SIDE */
+.acb-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 48px;
+  margin-bottom: 16px;
+}
+
+/* FIELD = label LEFT, input RIGHT */
+.acb-field {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.acb-field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.acb-field input {
+  height: 34px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.acb-field input:focus {
+  border-color: #273449;
+  box-shadow: 0 0 0 3px rgba(79,124,255,0.12);
+}
+
+.acb-field input::placeholder {
+  color: #9ca3af;
+}
+
+/* FOOTER */
+.acb-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* BUTTONS */
+.acb-btn {
+  height: 36px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.acb-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.acb-btn:active {
+  transform: translateY(0);
+}
+
+.acb-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.acb-btn-print {
+  background: #273449;
+  color: #ffffff;
+}
+
+.acb-btn-view {
+  background: #273449;
+  color: #ffffff;
+}
+
+/* ERROR & LOADING */
+.acb-error {
+  color: #c0392b;
+  font-size: 0.82rem;
+  margin: 0 0 10px 0;
+}
+
+.acb-loading {
+  color: #2980b9;
+  font-size: 0.82rem;
+  margin: 0 0 10px 0;
+}
+
+/* REPORT TABLE */
+.acb-table-wrapper {
+  margin-top: 24px;
+  overflow-x: auto;
+}
+
+.acb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+}
+
+.acb-table th,
+.acb-table td {
+  border: 1px solid #d1d5db;
+  padding: 8px 12px;
+  text-align: left;
+  white-space: nowrap;
+  color: #374151;
+}
+
+.acb-table thead tr {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+}
+
+.acb-table thead tr th {
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.acb-table tbody tr:nth-child(even) {
+  background-color: #f4f6f8;
+}
+
+.acb-table tbody tr:hover {
+  background-color: #dce9f5;
+}
+
+.acb-record-count {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: #6b7280;
+  text-align: right;
+}
+
+/* PRINT STYLES */
+.print-only {
+  display: none;
+}
+
+.acb-print-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.acb-print-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #273449;
+  margin: 0 0 4px 0;
+}
+
+.acb-print-header p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+@media print {
+
+  /* Hide sidebar, navbar, and input card */
+  .navbar,
+  .sidebar,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show print-only elements */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Break flex/grid layout so table fills full page */
+  .layout-wrapper,
+  .layout-body,
+  .main-content,
+  .page-content {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .acb-wrapper {
+    padding: 0;
+    background: #ffffff;
+    min-height: unset;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .acb-table-wrapper {
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  .acb-table {
+    width: 100%;
+  }
+
+  .acb-table th,
+  .acb-table td {
+    font-size: 0.72rem;
+    padding: 5px 8px;
+  }
+
+  .acb-table thead tr {
+    background: #273449 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .acb-table tbody tr:hover {
+    background-color: transparent;
+  }
+}

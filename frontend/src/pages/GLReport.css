@@ -1,0 +1,293 @@
+/* GL REPORT PAGE */
+
+.gl-report-wrapper {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 74px);
+}
+
+/* CARD */
+
+.gl-report-card {
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* HEADER */
+
+.gl-report-header {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  padding: 12px 18px;
+  letter-spacing: 0.5px;
+}
+
+/* BODY */
+
+.gl-report-body {
+  background: #f8f9fb;
+  padding: 20px 18px 16px 18px;
+}
+
+/* ROW */
+
+.gl-report-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+/* LABEL */
+
+.gl-report-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  min-width: 190px;
+}
+
+/* INPUT */
+
+.gl-report-input {
+  height: 36px;
+  width: 200px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.gl-report-input:focus {
+  border-color: #4f7cff;
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.12);
+}
+
+.gl-report-input::placeholder {
+  color: #9ca3af;
+}
+
+/* FOOTER */
+
+.gl-report-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+/* BUTTONS */
+
+.gl-btn {
+  height: 36px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.gl-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.gl-btn:active {
+  transform: translateY(0);
+}
+
+.gl-btn-print {
+  background: #273449;
+  color: #ffffff;
+}
+
+.gl-btn-view {
+  background: #273449;
+  color: #ffffff;
+}
+
+.gl-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ERROR & LOADING */
+
+.gl-report-error {
+  color: #c0392b;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  margin: 0 0 10px 0;
+}
+
+.gl-report-loading {
+  color: #2980b9;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  margin: 0 0 10px 0;
+}
+
+/* REPORT TABLE */
+
+.gl-report-table-wrapper {
+  margin-top: 24px;
+  overflow-x: auto;
+}
+
+.gl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+}
+
+.gl-table th,
+.gl-table td {
+  border: 1px solid #d1d5db;
+  padding: 8px 12px;
+  text-align: left;
+  white-space: nowrap;
+  color: #374151;
+}
+
+.gl-table thead tr {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+}
+
+.gl-table thead tr th {
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.gl-table tbody tr:nth-child(even) {
+  background-color: #f4f6f8;
+}
+
+.gl-table tbody tr:hover {
+  background-color: #dce9f5;
+}
+
+.gl-record-count {
+  margin-top: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.78rem;
+  color: #6b7280;
+  text-align: right;
+}
+
+/* PRINT STYLES */
+
+.print-only {
+  display: none;
+}
+
+.gl-print-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.gl-print-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #273449;
+  margin: 0 0 4px 0;
+}
+
+.gl-print-header p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+@media print {
+
+  /* Hide sidebar and navbar */
+  .navbar,
+  .sidebar {
+    display: none !important;
+  }
+
+  /* Hide the input card */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show print-only elements */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Break flex/grid layout so content fills full page width */
+  .layout-wrapper,
+  .layout-body,
+  .main-content,
+  .page-content {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Reset wrapper */
+  .gl-report-wrapper {
+    padding: 0;
+    background: #ffffff;
+    min-height: unset;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .gl-report-table-wrapper {
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  .gl-table {
+    width: 100%;
+  }
+
+  .gl-table th,
+  .gl-table td {
+    font-size: 0.72rem;
+    padding: 5px 8px;
+  }
+
+  .gl-table thead tr {
+    background: #273449 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* No hover effects while printing */
+  .gl-table tbody tr:hover {
+    background-color: transparent;
+  }
+
+  /* Hide record count */
+  .gl-record-count {
+    display: none;
+  }
+}
