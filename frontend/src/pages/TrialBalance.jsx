@@ -3,7 +3,7 @@
 import { useState } from "react";
 import "./TrialBalance.css";
 
-const API_BASE = "http://localhost:5000/api/trial-balance";
+const API_BASE = "https://cbsapi.avsinsotech.com:8596/api/trial-balance";
 
 // Format numbers with 2 decimal places and Indian locale
 const fmt = (v) => {

@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./BranchwiseGLReport.css";
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 
 // Format numbers with 2 decimal places and Indian locale
 const fmt = (v) => {

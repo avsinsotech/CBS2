@@ -1,7 +1,7 @@
 // src/api/api.js
 // Central API configuration and helper functions
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 
 // Generic fetch helper with error handling
 const apiFetch = async (url) => {

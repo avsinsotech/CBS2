@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 
 export default function TDSReport() {
   const [customerType,   setCustomerType]   = useState("All");
