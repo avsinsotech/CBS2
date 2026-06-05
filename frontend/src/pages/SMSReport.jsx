@@ -47,7 +47,7 @@ export default function SMSReport() {
 
     try {
       const params   = buildSMSParams({ fromDate, toDate, fromBrcd, toBrcd, mobileType, mobileNo });
-      const response = await fetch(`${BASE_URL}/api/sms-report/report?${params}`);
+      const response = await fetch(`${BASE_URL}/api/sms-master-report?${params}`);
       const data     = await response.json();
       if (!response.ok) throw new Error(data.error || data.details || "API request failed");
       setResults(data);
@@ -65,7 +65,7 @@ export default function SMSReport() {
 
     const params = buildSMSParams({ fromDate, toDate, fromBrcd, toBrcd, mobileType, mobileNo });
     // Opens the plain-text endpoint directly in a new tab
-    window.open(`${BASE_URL}/api/sms-report/text-report-view?${params}`, '_blank');
+    window.open(`${BASE_URL}/api/sms-text-report-view?${params}`, '_blank');
   };
 
   const handleClearAll = () => {

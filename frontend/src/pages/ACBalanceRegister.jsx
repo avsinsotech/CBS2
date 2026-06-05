@@ -1,83 +1,10 @@
-// import { useState } from "react";
-// import "./ACBalanceRegister.css";
 
-// function ACBalanceRegister() {
-//   const [form, setForm] = useState({
-//     branchCode: "1",
-//     glCode: "",
-//     subGLCode: "",
-//     asOnDate: "30/03/2026",
-//     textReportName: ""
-//   });
-
-//   const handleChange = (e) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
-
-//   const handlePrint = () => window.print();
-//   const handleTextReportView = () => alert(`Viewing: ${form.textReportName}`);
-
-//   return (
-//     <div className="acb-wrapper">
-//       <div className="acb-card">
-
-//         <div className="acb-header">
-//           <span>Account Bal Report</span>
-//         </div>
-
-//         <div className="acb-body">
-
-//           {/* ROW 1 */}
-//           <div className="acb-row">
-//             <div className="acb-field">
-//               <label>Branch Code</label>
-//               <input name="branchCode" value={form.branchCode} onChange={handleChange} />
-//             </div>
-//             <div className="acb-field">
-//               <label>GL Code</label>
-//               <input name="glCode" value={form.glCode} onChange={handleChange} />
-//             </div>
-//           </div>
-
-//           {/* ROW 2 */}
-//           <div className="acb-row">
-//             <div className="acb-field">
-//               <label>Sub GL Code</label>
-//               <input name="subGLCode" value={form.subGLCode} onChange={handleChange} />
-//             </div>
-//             <div className="acb-field">
-//               <label>AsOnDate</label>
-//               <input name="asOnDate" value={form.asOnDate} onChange={handleChange} />
-//             </div>
-//           </div>
-
-//           {/* ROW 3 */}
-//           <div className="acb-row">
-//             <div className="acb-field">
-//               <label>Enter Text Report Name</label>
-//               <input name="textReportName" value={form.textReportName} onChange={handleChange} />
-//             </div>
-//           </div>
-
-//           {/* BUTTONS */}
-//           <div className="acb-footer">
-//             <button className="acb-btn acb-btn-print" onClick={handlePrint}>Print</button>
-//             <button className="acb-btn acb-btn-view" onClick={handleTextReportView}>Text Report View</button>
-//           </div>
-
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default ACBalanceRegister;
 
 import { useState } from "react";
 import "./ACBalanceRegister.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
+// const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 function ACBalanceRegister() {
   const [form, setForm] = useState({
     branchCode: "1",
