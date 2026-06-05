@@ -257,6 +257,16 @@ import TDSReport from './pages/TDSReport'
 import CRRSLRReport from './pages/CRRSLRReport'
 import CRARReport from './pages/CRARReport'
 
+// Restored Monthly Reports
+import ChairmanReport from "./pages/ChairmanReport";
+import LoanAgainstFD from "./pages/LoanAgainstFD";
+import GoldLoanSanction from "./pages/GoldLoanSanction";
+import AllOkReport from "./pages/AllOkReport";
+import DepositLoanStatement from "./pages/DepositLoanStatement";
+import LoanSummary from "./pages/LoanSummary";
+import LoanDefaulterList from "./pages/LoanDefaulterList";
+import RateWiseDepositLoan from "./pages/RateWiseDepositLoan";
+
 function App() {
   return (
     <Routes>
@@ -312,6 +322,16 @@ function App() {
         <Route path="crr-slr-report"                    element={<CRRSLRReport />} />
         <Route path="crar-report"                       element={<CRARReport />} />
 
+        {/* Restored monthly reporting routes */}
+        <Route path="chairman-report" element={<ChairmanReport />} />
+        <Route path="loan-against-fd" element={<LoanAgainstFD />} />
+        <Route path="gold-loan-sanction" element={<GoldLoanSanction />} />
+        <Route path="all-ok-report" element={<AllOkReport />} />
+        <Route path="deposit-loan-statement" element={<DepositLoanStatement />} />
+        <Route path="loan-summary" element={<LoanSummary />} />
+        <Route path="loan-defaulter-list" element={<LoanDefaulterList />} />
+        <Route path="rate-wise-deposit-loan" element={<RateWiseDepositLoan />} />
+        <Route path="trial-balance" element={<TrialBalance />} />
       </Route>
     </Routes>
   )

@@ -1008,6 +1008,17 @@ const subRouteMap = {
   "Monthly__TDS Report":              "tds-report",
   "Monthly__CRR / SLR Report":        "crr-slr-report",
   "Monthly__CRARReport":              "crar-report",
+
+  // Restored Monthly reporting routes
+  "Monthly_Reporting__Chairman Report": "chairman-report",
+  "Monthly_Reporting__loan Against FD": "loan-against-fd",
+  "Monthly_Reporting__Gold Loan Sanction": "gold-loan-sanction",
+  "Monthly_Reporting__All Ok Report": "all-ok-report",
+  "Monthly_Reporting__Deposit & Loan Statement": "deposit-loan-statement",
+  "Monthly_Reporting__Loan Summary": "loan-summary",
+  "Monthly_Reporting__Loan Defaulter List": "loan-defaulter-list",
+  "Monthly_Reporting__Rate Wise-Deposit & Loan": "rate-wise-deposit-loan",
+  "Monthly_Reporting__Trial Balance": "trial-balance",
 };
 
 // ── Menu data ─────────────────────────────────────────────────────────────────
@@ -1129,7 +1140,20 @@ const menuItems = [
         ]
       },
       { label: "Saving",               children: [] },
-      { label: "Monthly_Reporting",    children: [] },
+      {
+        label: "Monthly_Reporting",
+        children: [
+          "Chairman Report",
+          "loan Against FD",
+          "Gold Loan Sanction",
+          "All Ok Report",
+          "Deposit & Loan Statement",
+          "Loan Summary",
+          "Loan Defaulter List",
+          "Rate Wise-Deposit & Loan",
+          "Trial Balance",
+        ]
+      },
       { label: "Certificate",          children: [] },
       { label: "GOI Security",         children: [] },
     ]

@@ -105,6 +105,22 @@ const branchWiseGLRoutes = require('./routes/branchWiseGL');
 const receiptPaymentRoutes = require('./routes/receiptPayment');
 const recPayBalanceRoutes = require('./routes/recPayBalance');
 const branchAdjustmentRoutes = require('./routes/branchAdjustment');
+
+// Restored routes
+const ctrReportRoutes = require('./routes/ctrReport');
+const kycReportRoutes = require('./routes/kycReport');
+const cdRatioReportRoutes = require('./routes/cdRatioReport');
+const siReportRoutes = require('./routes/siReport');
+const accountOpenCloseRoutes = require('./routes/accountOpenClose');
+const branchWiseDepositLoansRoutes = require('./routes/branchWiseDepositLoans');
+const dailyBalLessThanClgRoutes = require('./routes/dailyBalLessThanClg');
+const tdsReportRoutes = require('./routes/tdsReport');
+const chairmanReportRoutes = require('./routes/chairmanReport');
+const loanAgainstFDRoutes = require('./routes/loanAgainstFD');
+const goldLoanSanctionRoutes = require('./routes/goldLoanSanction');
+const depositLoanStatementRoutes = require('./routes/depositLoanStatement');
+const rateWiseDepositLoanRoutes = require('./routes/rateWiseDepositLoan');
+
 const app = express();
 
 // ✅ CORS — must be first, before everything else
@@ -164,7 +180,28 @@ app.use('/api/branch-wise-gl', branchWiseGLRoutes);
 app.use('/api/receipt-payment', receiptPaymentRoutes);
 app.use('/api/rec-pay-balance', recPayBalanceRoutes);
 app.use('/api/branch-adjustment', branchAdjustmentRoutes);
+
+// Restored routes mapping
+app.use('/api/ctr-report', ctrReportRoutes);
+app.use('/api/kyc-report', kycReportRoutes);
+app.use('/api/cd-ratio-report', cdRatioReportRoutes);
+app.use('/api/si-report', siReportRoutes);
+app.use('/api/account-open-close', accountOpenCloseRoutes);
+app.use('/api/branchwise-deposit-loans', branchWiseDepositLoansRoutes);
+app.use('/api/daily-balance-less-than-clg', dailyBalLessThanClgRoutes);
+app.use('/api/tds-report', tdsReportRoutes);
+app.use('/api/chairman-report', chairmanReportRoutes);
+app.use('/api/loan-against-fd', loanAgainstFDRoutes);
+app.use('/api/gold-loan-sanction', goldLoanSanctionRoutes);
+app.use('/api/deposit-loan-statement', depositLoanStatementRoutes);
+app.use('/api/rate-wise-deposit-loan', rateWiseDepositLoanRoutes);
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+// Restored 10-minute HTTP timeouts for long-running reports
+server.timeout = 600000;
+server.keepAliveTimeout = 600000;
+server.headersTimeout = 601000;
