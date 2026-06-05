@@ -1,14 +1,23 @@
 
 
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./BranchwiseGLReport.css";
 
 const API_BASE_URL = "http://localhost:5000";
 
+// Format numbers with 2 decimal places and Indian locale
+const fmt = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 // ─── date helper ─────────────────────────────────────────────
 // DD/MM/YYYY → YYYY-MM-DD  (what this backend expects per swagger)
 function toISO(raw) {
+  if (!raw) return null;
+  if (raw.includes("-")) return raw; // already ISO format
   const parts = raw.trim().split("/");
   if (parts.length !== 3) return null;
   let [d, m, y] = parts;
@@ -17,6 +26,8 @@ function toISO(raw) {
 }
 
 function isValidDate(raw) {
+  if (!raw) return false;
+  if (raw.includes("-")) return true; // Browser date input guarantees valid date
   const parts = raw.trim().split("/");
   if (parts.length !== 3) return false;
   const [d, m] = parts.map(Number);
@@ -31,8 +42,8 @@ function BranchwiseGLReport() {
     productType: "",
     productName: "",
     subGLCode:   "",
-    fromDate:    "01/04/2025",
-    toDate:      "30/03/2026",
+    fromDate:    "2025-04-01",
+    toDate:      "2026-03-30",
   });
 
   const [reportData,   setReportData]   = useState([]);
@@ -41,6 +52,30 @@ function BranchwiseGLReport() {
   const [error,        setError]        = useState("");
   const [fetched,      setFetched]      = useState(false);
   const [activeAction, setActiveAction] = useState("");
+  const debounceRef = useRef(null);
+
+  // Auto-fetch product name when productType changes
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const code = form.productType.trim();
+    const brcd = form.branchCode.trim();
+    if (!code || !brcd) {
+      setForm(f => ({ ...f, productName: "" }));
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/gl-report/product-name?subglcode=${encodeURIComponent(code)}&brcd=${encodeURIComponent(brcd)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setForm(f => ({ ...f, productName: data.GLNAME || "" }));
+        }
+      } catch (e) {
+        // silently fail
+      }
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [form.productType, form.branchCode]);
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -187,7 +222,7 @@ function BranchwiseGLReport() {
               <input className="bgl-input" name="productType"
                 placeholder="e.g. S" value={form.productType} onChange={handleChange} />
               <input className="bgl-input bgl-input-wide" name="productName"
-                placeholder="Product Name (display only)" value={form.productName} onChange={handleChange} />
+                placeholder="Product Name (display only)" value={form.productName} readOnly />
             </div>
           )}
 
@@ -203,11 +238,11 @@ function BranchwiseGLReport() {
           {/* From / To Date */}
           <div className="bgl-row">
             <label className="bgl-label">From Date <span className="req">*</span></label>
-            <input className="bgl-input" name="fromDate"
-              value={form.fromDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+            <input type="date" className="bgl-input" name="fromDate"
+              value={form.fromDate} onChange={handleChange} />
             <label className="bgl-inline-label">To Date <span className="req">*</span></label>
-            <input className="bgl-input" name="toDate"
-              value={form.toDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+            <input type="date" className="bgl-input" name="toDate"
+              value={form.toDate} onChange={handleChange} />
           </div>
 
           {/* Error */}
@@ -274,7 +309,7 @@ function BranchwiseGLReport() {
             <tbody>
               {reportData.map((row, i) => (
                 <tr key={i}>
-                  {columns.map((col) => <td key={col}>{row[col] ?? ""}</td>)}
+                  {columns.map((col) => <td key={col}>{typeof row[col] === 'number' ? fmt(row[col]) : (row[col] ?? "")}</td>)}
                 </tr>
               ))}
             </tbody>

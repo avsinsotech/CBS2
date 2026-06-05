@@ -3,14 +3,21 @@
 import { useState } from "react";
 import "./ACBalanceRegister.css";
 
-// const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// Format numbers with 2 decimal places and Indian locale
+const fmt = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 function ACBalanceRegister() {
   const [form, setForm] = useState({
     branchCode: "1",
     glCode: "",
     subGLCode: "",
-    asOnDate: "",
+    asOnDate: "2025-04-01",
     textReportName: ""
   });
 
@@ -27,6 +34,8 @@ function ACBalanceRegister() {
 
   // Convert DD/MM/YYYY  or  DD/MM/YY  →  YYYY-MM-DD for the API
   const parseDate = (raw) => {
+    if (!raw) return null;
+    if (raw.includes("-")) return raw; // already ISO format
     const parts = raw.trim().split("/");
     if (parts.length !== 3) return null;
     let [d, m, y] = parts;
@@ -128,8 +137,8 @@ function ACBalanceRegister() {
               <input name="subGLCode" value={form.subGLCode} onChange={handleChange} placeholder="Optional" />
             </div>
             <div className="acb-field">
-              <label>AsOnDate</label>
-              <input name="asOnDate" value={form.asOnDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+              <label>As On Date</label>
+              <input type="date" name="asOnDate" value={form.asOnDate} onChange={handleChange} />
             </div>
           </div>
 
@@ -190,10 +199,10 @@ function ACBalanceRegister() {
               </tr>
             </thead>
             <tbody>
-              {reportData.map((row, i) => (
-                <tr key={i}>
+              {reportData.map((row, index) => (
+                <tr key={index}>
                   {columns.map((col) => (
-                    <td key={col}>{row[col] ?? ""}</td>
+                    <td key={col}>{typeof row[col] === 'number' ? fmt(row[col]) : (row[col] ?? "")}</td>
                   ))}
                 </tr>
               ))}

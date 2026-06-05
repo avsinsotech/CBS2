@@ -141,13 +141,13 @@
 import { useState, useRef } from "react";
 import "./GLReport.css";
 
-const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // ── Format number ─────────────────────────────────────────────────────────────
 const fmt = (v) => {
   const n = parseFloat(v);
   if (isNaN(n)) return v ?? "";
-  return n.toLocaleString("en-IN");
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 // ── Formatted GL Report (matches the picture layout) ─────────────────────────

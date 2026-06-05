@@ -4,10 +4,18 @@ import { useState } from "react";
 import "./TrialBalance.css";
 
 const API_BASE = "http://localhost:5000/api/trial-balance";
-// const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+
+// Format numbers with 2 decimal places and Indian locale
+const fmt = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 // Helper: convert dd/mm/yyyy → yyyy-mm-dd for the backend
 function toISO(ddmmyyyy) {
   if (!ddmmyyyy) return "";
+  if (ddmmyyyy.includes("-")) return ddmmyyyy; // already ISO format
   const parts = ddmmyyyy.split("/");
   if (parts.length !== 3) return ddmmyyyy;
   return `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -17,8 +25,8 @@ function TrialBalance() {
   const [form, setForm] = useState({
     reportType: "Details Wise",
     branchCode: "1",
-    toDate: "30/03/2026",
-    fromDate: "",
+    toDate: "2026-03-30",
+    fromDate: "2025-04-01",
     sortType: "Code Wise",
     textReportName: "",
   });
@@ -120,9 +128,9 @@ function TrialBalance() {
             <div className="tb-field">
               <label>To Date <span className="req">*</span></label>
               <input
+                type="date"
                 className="tb-input"
                 name="toDate"
-                placeholder="dd/mm/yyyy"
                 value={form.toDate}
                 onChange={handleChange}
               />
@@ -131,9 +139,9 @@ function TrialBalance() {
               <div className="tb-field">
                 <label>From Date <span className="req">*</span></label>
                 <input
+                  type="date"
                   className="tb-input"
                   name="fromDate"
-                  placeholder="dd/mm/yyyy"
                   value={form.fromDate}
                   onChange={handleChange}
                 />
@@ -207,8 +215,8 @@ function TrialBalance() {
                 {tableData.map((row, i) => (
                   <tr key={i}>
                     {columns.map((col) => (
-                      <td key={col}>{row[col] ?? ""}</td>
-                    ))}
+                    <td key={col}>{typeof row[col] === 'number' ? fmt(row[col]) : (row[col] ?? "")}</td>
+                  ))}
                   </tr>
                 ))}
               </tbody>

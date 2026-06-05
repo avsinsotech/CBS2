@@ -266,9 +266,9 @@ function ProfitAndLoss() {
   const [form, setForm] = useState({
     reportType: "As On Date",
     branchCode: "",
-    asOnDate: "",
-    fromDate: "",
-    toDate: "",
+    asOnDate: "2026-03-30",
+    fromDate: "2025-04-01",
+    toDate: "2026-03-30",
     textReportName: ""
   });
 
@@ -293,6 +293,8 @@ function ProfitAndLoss() {
 
   // Convert DD/MM/YYYY → YYYY-MM-DD
   const parseDate = (raw) => {
+    if (!raw) return null;
+    if (raw.includes("-")) return raw; // already ISO format
     const parts = raw.trim().split("/");
     if (parts.length !== 3) return null;
     let [d, m, y] = parts;
@@ -469,19 +471,16 @@ function ProfitAndLoss() {
           {isAsOnDate ? (
             <div className="pl-row">
               <label className="pl-label">As On Date</label>
-              <input className="pl-input" name="asOnDate"
-                placeholder="DD/MM/YYYY"
+              <input type="date" className="pl-input" name="asOnDate"
                 value={form.asOnDate} onChange={handleChange} />
             </div>
           ) : (
             <div className="pl-row">
               <label className="pl-label">From Date</label>
-              <input className="pl-input" name="fromDate"
-                placeholder="DD/MM/YYYY"
+              <input type="date" className="pl-input" name="fromDate"
                 value={form.fromDate} onChange={handleChange} />
               <label className="pl-inline-label">To Date</label>
-              <input className="pl-input" name="toDate"
-                placeholder="DD/MM/YYYY"
+              <input type="date" className="pl-input" name="toDate"
                 value={form.toDate} onChange={handleChange} />
             </div>
           )}

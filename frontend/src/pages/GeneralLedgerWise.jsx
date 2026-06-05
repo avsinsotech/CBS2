@@ -1,12 +1,21 @@
 
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./GeneralLedgerWise.css";
 
-// const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// Format numbers with 2 decimal places and Indian locale
+const fmt = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 // DD/MM/YYYY → YYYY-MM-DD
 const parseDate = (raw) => {
+  if (!raw) return null;
+  if (raw.includes("-")) return raw; // already YYYY-MM-DD format
   const parts = raw.trim().split("/");
   if (parts.length !== 3) return null;
   let [d, m, y] = parts;
@@ -21,8 +30,8 @@ function GeneralLedgerWise() {
     branchCode:       "1",
     productTypeInput: "",
     productName:      "",
-    fromDate:         "01/04/2025",
-    toDate:           "30/03/2026"
+    fromDate:         "2025-04-01",
+    toDate:           "2026-03-30"
   });
 
   const [reportData, setReportData] = useState([]);
@@ -31,6 +40,30 @@ function GeneralLedgerWise() {
   const [error,      setError]      = useState("");
   const [fetched,    setFetched]    = useState(false);
   const [printMode,  setPrintMode]  = useState(""); // "report" | "summary"
+  const debounceRef = useRef(null);
+
+  // Auto-fetch product name when productTypeInput changes
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const code = form.productTypeInput.trim();
+    const brcd = form.branchCode.trim();
+    if (!code || !brcd) {
+      setForm(f => ({ ...f, productName: "" }));
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/gl-report/product-name?subglcode=${encodeURIComponent(code)}&brcd=${encodeURIComponent(brcd)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setForm(f => ({ ...f, productName: data.GLNAME || "" }));
+        }
+      } catch (e) {
+        // silently fail
+      }
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [form.productTypeInput, form.branchCode]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -206,7 +239,7 @@ function GeneralLedgerWise() {
                 name="productName"
                 placeholder="Product Name"
                 value={form.productName}
-                onChange={handleChange}
+                readOnly
               />
             </div>
           </div>
@@ -216,19 +249,19 @@ function GeneralLedgerWise() {
             <label className="glw-label">From Date : <span className="req">*</span></label>
             <div className="glw-inline-pair">
               <input
+                type="date"
                 className="glw-input"
                 name="fromDate"
                 value={form.fromDate}
                 onChange={handleChange}
-                placeholder="DD/MM/YYYY"
               />
               <label className="glw-inline-label">To Date : <span className="req">*</span></label>
               <input
+                type="date"
                 className="glw-input"
                 name="toDate"
                 value={form.toDate}
                 onChange={handleChange}
-                placeholder="DD/MM/YYYY"
               />
             </div>
           </div>
@@ -279,7 +312,7 @@ function GeneralLedgerWise() {
               {reportData.map((row, i) => (
                 <tr key={i}>
                   {columns.map((col) => (
-                    <td key={col}>{row[col] ?? ""}</td>
+                    <td key={col}>{typeof row[col] === 'number' ? fmt(row[col]) : (row[col] ?? "")}</td>
                   ))}
                 </tr>
               ))}

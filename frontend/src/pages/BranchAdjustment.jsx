@@ -3,13 +3,20 @@
 import { useState } from "react";
 import "./BranchAdjustment.css";
 
-// const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// Format numbers with 2 decimal places and Indian locale
+const fmt = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 function BranchAdjustment() {
   const [form, setForm] = useState({
     branchCode: "1",
-    fromDate: "01/04/2025",
-    toDate: "30/03/2026",
+    fromDate: "2025-04-01",
+    toDate: "2026-03-30",
     textReportName: ""
   });
 
@@ -26,6 +33,8 @@ function BranchAdjustment() {
 
   // Convert DD/MM/YYYY or DD/MM/YY → YYYY-MM-DD for the API
   const parseDate = (raw) => {
+    if (!raw) return null;
+    if (raw.includes("-")) return raw; // already ISO format
     const parts = raw.trim().split("/");
     if (parts.length !== 3) return null;
     let [d, m, y] = parts;
@@ -134,11 +143,11 @@ function BranchAdjustment() {
           <div className="ba-row">
             <div className="ba-field">
               <label>From Date <span className="req">*</span></label>
-              <input name="fromDate" value={form.fromDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+              <input type="date" name="fromDate" value={form.fromDate} onChange={handleChange} />
             </div>
             <div className="ba-field">
               <label>To Date <span className="req">*</span></label>
-              <input name="toDate" value={form.toDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+              <input type="date" name="toDate" value={form.toDate} onChange={handleChange} />
             </div>
           </div>
 
@@ -207,7 +216,7 @@ function BranchAdjustment() {
               {reportData.map((row, i) => (
                 <tr key={i}>
                   {columns.map((col) => (
-                    <td key={col}>{row[col] ?? ""}</td>
+                    <td key={col}>{typeof row[col] === 'number' ? fmt(row[col]) : (row[col] ?? "")}</td>
                   ))}
                 </tr>
               ))}

@@ -356,3 +356,7 @@
     padding: 6px;
   }
 }
+/* --- classic table overrides --- */
+.bs-classic-table thead { background: #f8f9fa !important; color: #333 !important; }
+.bs-classic-table thead th { border: 1px solid #c0c0c0 !important; color: #333 !important; font-weight: normal !important; padding: 4px 6px !important; }
+.bs-classic-table tbody td { border: 1px solid #c0c0c0 !important; padding: 4px 6px !important; }

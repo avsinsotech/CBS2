@@ -5,7 +5,16 @@ import "./ReciptPaymentReport.css";
 
 const API_BASE_URL = "http://localhost:5000";
 
+// Format numbers with 2 decimal places and Indian locale
+const fmt = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 function toISO(raw) {
+  if (!raw) return null;
+  if (raw.includes("-")) return raw; // already ISO format
   const parts = raw.trim().split("/");
   if (parts.length !== 3) return null;
   let [d, m, y] = parts;
@@ -14,6 +23,8 @@ function toISO(raw) {
 }
 
 function isValidDate(raw) {
+  if (!raw) return false;
+  if (raw.includes("-")) return true; // browser date input
   const parts = raw.trim().split("/");
   if (parts.length !== 3) return false;
   const [d, m] = parts.map(Number);
@@ -23,8 +34,8 @@ function isValidDate(raw) {
 function ReciptPaymentReport() {
   const [form, setForm] = useState({
     branchCode: "1",
-    fromDate: "01/04/2025",
-    toDate: "30/03/2026",
+    fromDate: "2025-04-01",
+    toDate: "2026-03-30",
   });
 
   const [reportData, setReportData] = useState([]);
@@ -106,11 +117,11 @@ function ReciptPaymentReport() {
           {/* From / To Date */}
           <div className="rpr-row">
             <label className="rpr-label">From Date</label>
-            <input className="rpr-input" name="fromDate"
-              value={form.fromDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+            <input type="date" className="rpr-input" name="fromDate"
+              value={form.fromDate} onChange={handleChange} />
             <label className="rpr-inline-label">To Date</label>
-            <input className="rpr-input" name="toDate"
-              value={form.toDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+            <input type="date" className="rpr-input" name="toDate"
+              value={form.toDate} onChange={handleChange} />
           </div>
 
           {/* Error */}
@@ -156,7 +167,7 @@ function ReciptPaymentReport() {
             <tbody>
               {reportData.map((row, i) => (
                 <tr key={i}>
-                  {columns.map((col) => <td key={col}>{row[col] ?? ""}</td>)}
+                  {columns.map((col) => <td key={col}>{typeof row[col] === 'number' ? fmt(row[col]) : (row[col] ?? "")}</td>)}
                 </tr>
               ))}
             </tbody>

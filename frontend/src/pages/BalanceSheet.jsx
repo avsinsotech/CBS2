@@ -1,12 +1,19 @@
 
-
 import { useState } from "react";
 import "./BalanceSheet.css";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-// const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+
+// Format numbers with 2 decimal places and Indian locale
+const fmt = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
 
 // ─── helpers ────────────────────────────────────────────────
 function parseDate(raw) {
+  if (!raw) return null;
+  if (raw.includes("-")) return raw; // already ISO format
   const parts = raw.trim().split("/");
   if (parts.length !== 3) return null;
   let [d, m, y] = parts;
@@ -66,14 +73,143 @@ const ENDPOINT_MAP = {
   },
 };
 
+// Format to 4 decimal places without commas
+const fmt4 = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toFixed(4);
+};
+
+// ─── custom formatted table ──────────────────────────────────────────────
+function BSReportFormatted({ data, columns }) {
+  const hasSplit = data.length > 0 && ('CRGL' in data[0] || 'DRGL' in data[0]);
+
+  if (!hasSplit) {
+    return (
+      <table className="bs-table bs-classic-table">
+        <thead>
+          <tr>{columns.map((col) => <th key={col}>{col}</th>)}</tr>
+        </thead>
+        <tbody>
+          {data.map((row, i) => (
+            <tr key={i}>
+              {columns.map((col) => <td key={col}>{typeof row[col] === 'number' ? fmt(row[col]) : (row[col] ?? "")}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
+  // Compute rowSpans for grouping Glcode
+  const crglSpans = new Array(data.length).fill(0);
+  const drglSpans = new Array(data.length).fill(0);
+
+  let i = 0;
+  while (i < data.length) {
+    let j = i + 1;
+    while (j < data.length && data[j].CRGL === data[i].CRGL && data[i].CRGL !== "" && data[i].CRGL !== "0") {
+      j++;
+    }
+    crglSpans[i] = j - i;
+    i = j;
+  }
+
+  i = 0;
+  while (i < data.length) {
+    let j = i + 1;
+    while (j < data.length && data[j].DRGL === data[i].DRGL && data[i].DRGL !== "" && data[i].DRGL !== "0") {
+      j++;
+    }
+    drglSpans[i] = j - i;
+    i = j;
+  }
+
+  return (
+    <table className="bs-table bs-classic-table">
+      <thead>
+        <tr>
+          <th style={{ textAlign: "left" }}>LABILITY</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th style={{ textAlign: "left" }}>ASSET</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+        <tr>
+          {/* LIABILITY */}
+          <th>Glcode</th>
+          <th>Product Code</th>
+          <th>Product Name</th>
+          <th>ID</th>
+          <th>Group</th>
+          <th>Balance</th>
+          {/* ASSET */}
+          <th>Glcode</th>
+          <th>Product Code</th>
+          <th>Product Name</th>
+          <th>ID</th>
+          <th>Group</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((row, idx) => {
+          return (
+            <tr key={idx}>
+              {/* LIABILITY */}
+              {crglSpans[idx] > 0 && (
+                <td rowSpan={crglSpans[idx]} style={{ verticalAlign: "middle" }}>
+                  {row.CRGL === "0" ? "" : row.CRGL}
+                </td>
+              )}
+              {crglSpans[idx] === 0 && row.CRGL === data[idx - 1]?.CRGL && row.CRGL !== "0" && row.CRGL !== "" ? null : (
+                crglSpans[idx] === 0 && (<td>{row.CRGL === "0" ? "" : row.CRGL}</td>)
+              )}
+
+              <td>{row.CRGLN || ""}</td>
+              <td>{row.CRSGL || ""}</td>
+              <td>{row.CRGLRID || ""}</td>
+              <td>{row.CRGLTP || ""}</td>
+              <td style={{ textAlign: "right" }}>{row.CRBAL || row.CRBAL === 0 ? fmt4(row.CRBAL) : ""}</td>
+
+              {/* ASSET */}
+              {drglSpans[idx] > 0 && (
+                <td rowSpan={drglSpans[idx]} style={{ verticalAlign: "middle" }}>
+                  {row.DRGL === "0" ? "" : row.DRGL}
+                </td>
+              )}
+              {drglSpans[idx] === 0 && row.DRGL === data[idx - 1]?.DRGL && row.DRGL !== "0" && row.DRGL !== "" ? null : (
+                drglSpans[idx] === 0 && (<td>{row.DRGL === "0" ? "" : row.DRGL}</td>)
+              )}
+
+              <td>{row.DRSGL || ""}</td>
+              <td>{row.DRGLN || ""}</td>
+              <td></td>
+              <td>{row.DRGLRID || ""}</td>
+              <td style={{ textAlign: "right" }}>{(row.DRGLTP || "") + (row.DRBAL || row.DRBAL === 0 ? fmt4(row.DRBAL) : "")}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
 // ─── component ───────────────────────────────────────────────
 function BalanceSheet() {
   const [form, setForm] = useState({
     reportType: "As On Date",
     branchCode: "1",
-    asOnDate: "30/03/2026",
-    fromDate: "01/04/2025",
-    toDate: "30/03/2026",
+    asOnDate: "2026-03-30",
+    fromDate: "2025-04-01",
+    toDate: "2026-03-30",
     skipBranchAdj: false,
     textReportName: "",
   });
@@ -226,17 +362,17 @@ function BalanceSheet() {
           {isSingleDate ? (
             <div className="bs-row">
               <label className="bs-label">As On Date</label>
-              <input className="bs-input" name="asOnDate"
-                value={form.asOnDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+              <input type="date" className="bs-input" name="asOnDate"
+                value={form.asOnDate} onChange={handleChange} />
             </div>
           ) : (
             <div className="bs-row">
               <label className="bs-label">From Date</label>
-              <input className="bs-input" name="fromDate"
-                value={form.fromDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+              <input type="date" className="bs-input" name="fromDate"
+                value={form.fromDate} onChange={handleChange} />
               <label className="bs-inline-label">To Date</label>
-              <input className="bs-input" name="toDate"
-                value={form.toDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+              <input type="date" className="bs-input" name="toDate"
+                value={form.toDate} onChange={handleChange} />
             </div>
           )}
 
@@ -298,20 +434,7 @@ function BalanceSheet() {
             </p>
           </div>
 
-          <table className="bs-table">
-            <thead>
-              <tr>
-                {columns.map((col) => <th key={col}>{col}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.map((row, i) => (
-                <tr key={i}>
-                  {columns.map((col) => <td key={col}>{row[col] ?? ""}</td>)}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <BSReportFormatted data={reportData} columns={columns} />
 
           <p className="bs-record-count no-print">
             Total Records: {reportData.length}
