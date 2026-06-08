@@ -1,16 +1,45 @@
 import { useState } from "react";
+import "./CDRatioReport.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cbsapi.avsinsotech.com:8596";
+
+function formatDateToDMY(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    const [y, m, d] = parts;
+    return `${d}/${m}/${y}`;
+  }
+  return dateStr;
+}
+
+function getCurrentTimeFormatted() {
+  const now = new Date();
+  let hours = now.getHours();
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours ? hours : 12; 
+  return `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+}
+
+const CATEGORY_ORDER = {
+  'DP': 1,
+  'INV': 2,
+  'LNV': 3,
+  'PL': 4,
+  'REF': 5,
+  'SHR': 6
+};
 
 export default function CDRatioReport() {
   const [reportType, setReportType] = useState("summary"); // "summary" | "details"
   const [branchCode, setBranchCode] = useState("1");
   const [branchName, setBranchName] = useState("HEAD OFFICE");
-  const [asOnDate, setAsOnDate] = useState("2026-03-30");
+  const [asOnDate, setAsOnDate] = useState("2025-07-26");
   const [textReportName, setTextReportName] = useState("");
 
   const [reportData, setReportData] = useState([]);
-  const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fetched, setFetched] = useState(false);
@@ -19,10 +48,9 @@ export default function CDRatioReport() {
     setReportType("summary");
     setBranchCode("1");
     setBranchName("HEAD OFFICE");
-    setAsOnDate("2026-03-30");
+    setAsOnDate("2025-07-26");
     setTextReportName("");
     setReportData([]);
-    setColumns([]);
     setError("");
     setFetched(false);
   };
@@ -42,12 +70,12 @@ export default function CDRatioReport() {
     setFetched(false);
 
     try {
-      const flag1Value = reportType === "summary" ? "CD" : "";
+      // Always call the SP with empty flag1 to get the 6 rows
       const body = {
         flag: "CDR",
         brcd: branchCode.trim(),
         onDate: asOnDate,
-        flag1: flag1Value
+        flag1: "" 
       };
 
       const res = await fetch(`${API_BASE_URL}/api/cd-ratio-report`, {
@@ -63,8 +91,15 @@ export default function CDRatioReport() {
 
       const resData = await res.json();
       const data = resData.data || [];
-      setColumns(data.length > 0 ? Object.keys(data[0]) : []);
-      setReportData(data);
+      
+      // Sort rows precisely in mockup order: DP, INV, LNV, PL, REF, SHR
+      const sortedRows = [...data].sort((a, b) => {
+        const orderA = CATEGORY_ORDER[a.Glg?.trim()] || 99;
+        const orderB = CATEGORY_ORDER[b.Glg?.trim()] || 99;
+        return orderA - orderB;
+      });
+
+      setReportData(sortedRows);
       setFetched(true);
     } catch (err) {
       setError(err.message || "Failed to fetch report.");
@@ -95,156 +130,293 @@ export default function CDRatioReport() {
 
   const handleDownloadCsv = () => {
     if (!reportData || !reportData.length) return;
-    const headers = Object.keys(reportData[0]).join(',');
-    const rows = reportData.map(row => 
-      Object.values(row).map(val => {
-        let str = String(val ?? '');
-        str = str.replace(/"/g, '""');
-        if (str.includes(',') || str.includes('\n') || str.includes('"')) {
-          str = `"${str}"`;
-        }
-        return str;
-      }).join(',')
-    );
+    
+    // Custom CSV columns matching mockup table
+    const headers = ["Sr No", "Group", "Gl Name", "Amount", "DrCr"].join(',');
+    
+    const rows = reportData.map((row, index) => {
+      const glg = row.Glg?.trim() || "";
+      const glname = row.Glname?.trim() || "";
+      const amount = Math.abs(parseFloat(row.CBal || 0)).toFixed(2);
+      return [index + 1, `"${glg}"`, `"${glname}"`, amount, ""].join(',');
+    });
+
+    // Append CD Ratio Row to CSV
+    const { formattedCdRatio } = calculateCdRatio();
+    rows.push([
+      `"[((Shares+REF+PL+PLA-FAF-INV)-Loan)/Deposit*100] = CD RATIO"`,
+      "",
+      "",
+      "",
+      ""
+    ].join(','));
+    rows.push([
+      "",
+      "",
+      `"CD RATIO"`,
+      `"${formattedCdRatio} %"`,
+      ""
+    ].join(','));
+
     const csvContent = [headers, ...rows].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `cd_ratio_${reportType}_${asOnDate}.csv`);
+    link.setAttribute('download', `cd_ratio_report_${asOnDate}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  // Dynamic CD Ratio Calculation matching DB logic exactly
+  const calculateCdRatio = () => {
+    const getCBal = (glg) => {
+      const row = reportData.find(r => r.Glg?.trim() === glg);
+      return row ? Math.abs(parseFloat(row.CBal || 0)) : 0;
+    };
+    const getRawCBal = (glg) => {
+      const row = reportData.find(r => r.Glg?.trim() === glg);
+      return row ? parseFloat(row.CBal || 0) : 0;
+    };
+
+    const shares = getCBal("SHR");
+    const ref = getCBal("REF");
+    const pl = getRawCBal("PL");
+    const pla = getRawCBal("PLA");
+    const faf = getCBal("FAF");
+    const inv = getCBal("INV");
+    const loan = getCBal("LNV");
+    const deposit = getCBal("DP");
+
+    let ratioVal = 0;
+    if (deposit > 0) {
+      ratioVal = Math.abs((((shares + ref + pl + pla - faf - inv) - loan) / deposit) * 100);
+    }
+    
+    return {
+      formattedCdRatio: ratioVal.toFixed(2)
+    };
+  };
+
+  const { formattedCdRatio } = reportData.length > 0 ? calculateCdRatio() : { formattedCdRatio: "0.00" };
+
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.cardHeader}>
-          <h2 style={styles.cardTitle}>CD Ratio</h2>
+    <div className="cdr-wrapper">
+      <div className="cdr-card no-print">
+        <div className="cdr-header">
+          <span>CD Ratio Report</span>
         </div>
 
-        <div style={styles.cardBody}>
-          <div style={styles.innerBox}>
-            {/* Report Type Radio */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>Report Type</label>
-              <div style={styles.radioGroup}>
-                <label style={styles.radioLabel}>
-                  <input
-                    type="radio" name="reportType" value="summary"
-                    checked={reportType === "summary"}
-                    onChange={() => setReportType("summary")}
-                    style={styles.radioInput}
-                  />
-                  Summary
-                </label>
-                <label style={styles.radioLabel}>
-                  <input
-                    type="radio" name="reportType" value="details"
-                    checked={reportType === "details"}
-                    onChange={() => setReportType("details")}
-                    style={styles.radioInput}
-                  />
-                  Details
-                </label>
-              </div>
-            </div>
-
-            {/* Branch Code */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>Branch Code</label>
-              <input
-                style={{ ...styles.input, ...styles.inputYellow, width: 200 }}
-                type="text"
-                value={branchCode}
-                onChange={(e) => setBranchCode(e.target.value)}
-              />
-              <input
-                style={{ ...styles.input, ...styles.inputPink, width: 320, marginLeft: 8 }}
-                type="text"
-                value={branchName}
-                readOnly
-              />
-            </div>
-
-            {/* As On Date */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>As On Date</label>
-              <input
-                style={{ ...styles.input, width: 200 }}
-                type="date"
-                value={asOnDate}
-                onChange={(e) => setAsOnDate(e.target.value)}
-              />
-            </div>
-
-            {/* Enter Text Report Name */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>Enter Text Report Name</label>
-              <input
-                style={{ ...styles.input, width: 340 }}
-                type="text"
-                placeholder="Enter Text Report Name"
-                value={textReportName}
-                onChange={(e) => setTextReportName(e.target.value)}
-              />
+        <div className="cdr-form-section">
+          {/* Report Type Radio */}
+          <div className="cdr-row">
+            <label className="cdr-label">Report Type</label>
+            <div className="cdr-radio-group">
+              <label className="cdr-radio-label">
+                <input
+                  type="radio" name="reportType" value="summary"
+                  checked={reportType === "summary"}
+                  onChange={() => setReportType("summary")}
+                  className="cdr-radio-input"
+                />
+                Summary
+              </label>
+              <label className="cdr-radio-label">
+                <input
+                  type="radio" name="reportType" value="details"
+                  checked={reportType === "details"}
+                  onChange={() => setReportType("details")}
+                  className="cdr-radio-input"
+                />
+                Details
+              </label>
             </div>
           </div>
 
-          {error && <p style={styles.errorText}>⚠️ {error}</p>}
+          {/* Branch Code */}
+          <div className="cdr-row">
+            <label className="cdr-label">Branch Code</label>
+            <input
+              className="cdr-input"
+              style={{ background: "#fefce8", borderColor: "#fbbf24", width: 200 }}
+              type="text"
+              value={branchCode}
+              onChange={(e) => {
+                const val = e.target.value;
+                setBranchCode(val);
+                setBranchName(val === "1" ? "HEAD OFFICE" : `BRANCH ${val}`);
+              }}
+            />
+            <input
+              className="cdr-input"
+              style={{ background: "#fff1f2", borderColor: "#fda4af", color: "#9f1239", width: 320, marginLeft: 8 }}
+              type="text"
+              value={branchName}
+              readOnly
+            />
+          </div>
 
-          {loading && (
-            <div style={styles.loadingBar}>
-              <div style={styles.loadingFill} />
-            </div>
+          {/* As On Date */}
+          <div className="cdr-row">
+            <label className="cdr-label">As On Date</label>
+            <input
+              className="cdr-input"
+              style={{ width: 200 }}
+              type="date"
+              value={asOnDate}
+              onChange={(e) => setAsOnDate(e.target.value)}
+            />
+          </div>
+
+          {/* Enter Text Report Name */}
+          <div className="cdr-row">
+            <label className="cdr-label">Enter Text Report Name</label>
+            <input
+              className="cdr-input"
+              style={{ width: 340 }}
+              type="text"
+              placeholder="Enter Text Report Name"
+              value={textReportName}
+              onChange={(e) => setTextReportName(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {error && <p className="cdr-error" style={{ margin: "0 20px 10px 20px" }}>⚠️ {error}</p>}
+
+        {loading && (
+          <div className="cdr-loading-bar" style={{ margin: "0 20px 10px 20px", width: "calc(100% - 40px)" }}>
+            <div className="cdr-loading-fill" />
+          </div>
+        )}
+
+        {/* Footer Buttons */}
+        <div className="cdr-btn-row">
+          <button className="cdr-btn cdr-btn-blue" onClick={handleFetchReport} disabled={loading}>Report</button>
+          <button className="cdr-btn cdr-btn-blue" onClick={handleTextReportView} disabled={loading}>Text Report View</button>
+          <button className="cdr-btn cdr-btn-secondary" onClick={handleClearAll} disabled={loading}>Clear All</button>
+          {reportData.length > 0 && (
+            <button className="cdr-btn cdr-btn-excel" onClick={handleDownloadCsv} disabled={loading}>Export CSV</button>
           )}
-
-          {/* Footer Buttons */}
-          <div style={styles.footer}>
-            <div style={styles.btnRow}>
-              <button style={styles.btnPrimary} onClick={handleFetchReport} disabled={loading}>Report</button>
-              <button style={styles.btnPrimary} onClick={handleTextReportView} disabled={loading}>Text Report View</button>
-              <button style={styles.btnSecondary} onClick={handleClearAll} disabled={loading}>Clear All</button>
-              {reportData.length > 0 && (
-                <button style={styles.btnExcel} onClick={handleDownloadCsv}>Export CSV</button>
-              )}
-            </div>
-          </div>
-
         </div>
       </div>
 
-      {/* Results Section */}
+      {/* Results Section / Preview Layout */}
       {fetched && reportData.length > 0 && (
-        <div style={styles.tableWrapper}>
-          <div style={styles.tableHeader}>
-            <span style={{ fontWeight: 600, fontSize: 13, color: "#1e293b" }}>
-              CD Ratio {reportType === "summary" ? "Summary" : "Details"} Report — {reportData.length} records found
-            </span>
+        <>
+          {/* Preview Toolbar */}
+          <div className="cdr-preview-toolbar no-print">
+            <span className="cdr-preview-title">CD Ratio Report — Preview</span>
+            <button className="cdr-btn-print" onClick={() => window.print()}>
+              🖨️ Print
+            </button>
           </div>
-          <div style={{ overflowX: "auto", maxHeight: "400px" }}>
-            <table style={styles.table}>
+
+          {/* Formatted Report Document */}
+          <div className="cdr-formatted-report">
+            {/* Org Header */}
+            <div className="cdr-fmt-org-name">
+              SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI
+            </div>
+
+            {/* Meta Grid */}
+            <div className="cdr-fmt-meta-grid">
+              <div className="cdr-fmt-meta-left">
+                <div className="cdr-fmt-meta-row">
+                  <span className="cdr-fmt-meta-key">BANK NAME</span>
+                  <span className="cdr-fmt-meta-sep">:</span>
+                  <span className="cdr-fmt-meta-val">SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI</span>
+                </div>
+                <div className="cdr-fmt-meta-row">
+                  <span className="cdr-fmt-meta-key">BRANCH NAME</span>
+                  <span className="cdr-fmt-meta-sep">:</span>
+                  <span className="cdr-fmt-meta-val">{branchName}</span>
+                </div>
+                <div className="cdr-fmt-meta-row">
+                  <span className="cdr-fmt-meta-key">AS On Date</span>
+                  <span className="cdr-fmt-meta-sep">:</span>
+                  <span className="cdr-fmt-meta-val">{formatDateToDMY(asOnDate)}</span>
+                </div>
+              </div>
+              <div className="cdr-fmt-meta-right">
+                <div className="cdr-fmt-meta-row">
+                  <span className="cdr-fmt-meta-key">Print Date</span>
+                  <span className="cdr-fmt-meta-sep">:</span>
+                  <span className="cdr-fmt-meta-val">
+                    {new Date().toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  </span>
+                </div>
+                <div className="cdr-fmt-meta-row">
+                  <span className="cdr-fmt-meta-key">User Name</span>
+                  <span className="cdr-fmt-meta-sep">:</span>
+                  <span className="cdr-fmt-meta-val">Rohini</span>
+                </div>
+                <div className="cdr-fmt-meta-row">
+                  <span className="cdr-fmt-meta-key">Generated Time</span>
+                  <span className="cdr-fmt-meta-sep">:</span>
+                  <span className="cdr-fmt-meta-val">{getCurrentTimeFormatted()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Banner Row */}
+            <div className="cdr-fmt-banner">
+              Report Name - CD Ratio Report
+            </div>
+
+            <table className="cdr-fmt-table">
               <thead>
-                <tr style={styles.thRow}>
-                  {columns.map((col) => (
-                    <th key={col} style={styles.th}>{col}</th>
-                  ))}
+                <tr>
+                  <th className="cdr-fmt-th" style={{ width: "8%" }}>Sr No</th>
+                  <th className="cdr-fmt-th" style={{ width: "12%" }}>Group</th>
+                  <th className="cdr-fmt-th" style={{ width: "50%" }}>Gl Name</th>
+                  <th className="cdr-fmt-th" style={{ width: "20%", textAlign: "right" }}>Amount</th>
+                  <th className="cdr-fmt-th" style={{ width: "10%" }}>DrCr</th>
                 </tr>
               </thead>
               <tbody>
-                {reportData.map((row, i) => (
-                  <tr key={i} style={i % 2 === 0 ? styles.trEven : styles.trOdd}>
-                    {columns.map((col) => (
-                      <td key={col} style={styles.td}>{String(row[col] ?? "-")}</td>
-                    ))}
-                  </tr>
-                ))}
+                {reportData.map((row, index) => {
+                  const glg = row.Glg?.trim() || "";
+                  const glname = row.Glname?.trim() || "";
+                  const val = parseFloat(row.CBal || 0);
+                  const amount = Math.abs(val).toFixed(2);
+                  
+                  return (
+                    <tr key={index}>
+                      <td className="cdr-fmt-td">{index + 1}</td>
+                      <td className="cdr-fmt-td">{glg}</td>
+                      <td className="cdr-fmt-td">{glname}</td>
+                      <td className="cdr-fmt-td" style={{ textAlign: "right" }}>{amount}</td>
+                      <td className="cdr-fmt-td"></td>
+                    </tr>
+                  );
+                })}
+                
+                {/* Formula row */}
+                <tr>
+                  <td className="cdr-fmt-td cdr-formula-text" colSpan="3">
+                    [((Shares+REF+PL+PLA-FAF-INV)-Loan)/Deposit*100] = CD RATIO
+                  </td>
+                  <td className="cdr-fmt-td"></td>
+                  <td className="cdr-fmt-td"></td>
+                </tr>
+
+                {/* CD Ratio value row */}
+                <tr>
+                  <td className="cdr-fmt-td"></td>
+                  <td className="cdr-fmt-td"></td>
+                  <td className="cdr-fmt-td cdr-total-label">CD RATIO</td>
+                  <td className="cdr-fmt-td" style={{ textAlign: "right", fontWeight: 700 }}>
+                    {formattedCdRatio} %
+                  </td>
+                  <td className="cdr-fmt-td"></td>
+                </tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </>
       )}
 
       {fetched && reportData.length === 0 && (
@@ -255,36 +427,3 @@ export default function CDRatioReport() {
     </div>
   );
 }
-
-const styles = {
-  container: { display: "flex", flexDirection: "column", gap: 20, width: "100%" },
-  card: { background: "white", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", fontFamily: "'Poppins', sans-serif" },
-  cardHeader: { background: "linear-gradient(90deg, #334155, #334155)", padding: "12px 20px" },
-  cardTitle: { color: "white", margin: 0, fontSize: 16, fontWeight: 600 },
-  cardBody: { padding: "24px 20px" },
-  innerBox: { border: "1px solid #bfdbfe", borderRadius: 8, padding: "18px 20px", marginBottom: 20, background: "#fff" },
-  formRow: { display: "flex", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 },
-  label: { fontSize: 12, fontWeight: 500, color: "#374151", flexShrink: 0, width: 160 },
-  input: { height: 34, border: "1px solid #d1d5db", borderRadius: 6, padding: "0 10px", fontSize: 12, color: "#1e293b", outline: "none", fontFamily: "'Poppins', sans-serif", boxSizing: "border-box" },
-  inputYellow: { background: "#fefce8", borderColor: "#fbbf24" },
-  inputPink: { background: "#fff1f2", borderColor: "#fda4af", color: "#9f1239" },
-  radioGroup: { display: "flex", alignItems: "center", gap: 28 },
-  radioLabel: { display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 500, color: "#374151", cursor: "pointer" },
-  radioInput: { width: 15, height: 15, accentColor: "#2563eb", cursor: "pointer" },
-  footer: { background: "#f8fafc", margin: "20px -20px -20px", padding: "14px 20px", borderTop: "1px solid #e5e7eb" },
-  btnRow: { display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" },
-  btnPrimary: { height: 32, padding: "0 20px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none", color: "white", background: "linear-gradient(90deg, #334155, #334155)", fontFamily: "'Poppins', sans-serif" },
-  btnSecondary: { height: 32, padding: "0 20px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", background: "#f1f5f9", border: "1px solid #cbd5e1", color: "#334155", fontFamily: "'Poppins', sans-serif" },
-  btnExcel: { height: 32, padding: "0 20px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", background: "linear-gradient(90deg, #10b981, #059669)", border: "none", color: "white", fontFamily: "'Poppins', sans-serif" },
-  errorText: { color: "#ef4444", fontSize: 12, margin: "10px 0", fontWeight: 500 },
-  loadingBar: { width: "100%", height: 4, backgroundColor: "#e2e8f0", borderRadius: 2, overflow: "hidden", marginBottom: 16 },
-  loadingFill: { width: "50%", height: "100%", backgroundColor: "#3b82f6" },
-  tableWrapper: { background: "white", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", padding: 20, fontFamily: "'Poppins', sans-serif" },
-  tableHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid #e2e8f0", paddingBottom: 10 },
-  table: { width: "100%", borderCollapse: "collapse", fontSize: 12, textAlign: "left" },
-  thRow: { backgroundColor: "#f8fafc", borderBottom: "2px solid #e2e8f0" },
-  th: { padding: "10px 12px", fontWeight: 600, color: "#475569" },
-  td: { padding: "10px 12px", color: "#334155", borderBottom: "1px solid #f1f5f9" },
-  trEven: { backgroundColor: "#ffffff" },
-  trOdd: { backgroundColor: "#f8fafc" },
-};
