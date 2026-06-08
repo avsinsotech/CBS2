@@ -76,5 +76,6 @@ const cuteBookDetailsController = require('../controllers/cuteBookDetailsControl
  *         description: Server Error
  */
 router.get('/', cuteBookDetailsController.getCuteBookDetails);
+router.get('/text-report-view', cuteBookDetailsController.getCuteBookTextReportView);
 
 module.exports = router;

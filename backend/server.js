@@ -256,6 +256,11 @@ const loanAgainstFDRoutes       = require('./routes/loanAgainstFD');
 const goldLoanSanctionRoutes    = require('./routes/goldLoanSanction');
 const depositLoanStatementRoutes = require('./routes/depositLoanStatement');
 const rateWiseDepositLoanRoutes = require('./routes/rateWiseDepositLoan');
+const inOperativeAccListRoutes  = require('./routes/inOperativeAccList');
+const crrSlrReportRoutes        = require('./routes/crrSlrReport');
+const crarReportRoutes          = require('./routes/crarReport');
+const documentRegisterRoutes    = require('./routes/documentRegister');
+const allOkReportRoutes         = require('./routes/allOkReport');
 
 const app = express();
 
@@ -380,6 +385,11 @@ app.use('/api/loan-against-fd',        loanAgainstFDRoutes);
 app.use('/api/gold-loan-sanction',     goldLoanSanctionRoutes);
 app.use('/api/deposit-loan-statement', depositLoanStatementRoutes);
 app.use('/api/rate-wise-deposit-loan', rateWiseDepositLoanRoutes);
+app.use('/api/inoperative-acc-list',   inOperativeAccListRoutes);
+app.use('/api/crr-slr-report',         crrSlrReportRoutes);
+app.use('/api/crar-report',            crarReportRoutes);
+app.use('/api/document-register',      documentRegisterRoutes);
+app.use('/api/all-ok-report',          allOkReportRoutes);
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
