@@ -231,11 +231,6 @@ export default function CRARReport() {
         {/* Buttons */}
         <div className="crar-btn-row">
           <button className="crar-btn crar-btn-blue" onClick={handleFetchReport} disabled={loading}>Report</button>
-          <button className="crar-btn crar-btn-blue" onClick={handleTextReportView} disabled={loading}>Text Report View</button>
-          <button className="crar-btn crar-btn-secondary" onClick={handleClear} disabled={loading}>Clear All</button>
-          {(capitalFunds.length > 0 || riskAssets.length > 0) && (
-            <button className="crar-btn crar-btn-excel" onClick={handleDownloadCsv} disabled={loading}>Export CSV</button>
-          )}
         </div>
       </div>
 
