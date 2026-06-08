@@ -33,15 +33,16 @@ function SummaryFormattedTable({ data, fromDate, toDate, form }) {
   
   const subGlCode = form.productTypeInput || "";
   const glName = form.productName || "";
-  const title = `${subGlCode} - ${glName} Product Detailed Summary From ${fromDate} To ${toDate}`;
+  const formattedFromDate = fromDate ? fromDate.split('-').reverse().join('/') : "";
+  const formattedToDate = toDate ? toDate.split('-').reverse().join('/') : "";
+  const title = `${subGlCode} - ${glName} Office Account Statement report From ${formattedFromDate} To ${formattedToDate}`;
 
   let totalPayment = 0;
   let totalReceipt = 0;
 
   const items = data.map((row, index) => {
     const edate = row.EDATE || (row.ENTRYDATE ? new Date(row.ENTRYDATE).toLocaleDateString('en-GB').replace(/\//g, '-') : "");
-    const accno = row.ACCNO || "";
-    const custname = row.CUSTNAME || "";
+    const setno = row.SETNO || "";
     let parti = row.PARTI || "";
     if (row.PARTI1) parti += " " + row.PARTI1;
     if (row.Activity && parti === "") parti = row.Activity;
@@ -56,8 +57,7 @@ function SummaryFormattedTable({ data, fromDate, toDate, form }) {
     return {
       index: index + 1,
       edate,
-      accno,
-      custname,
+      setno,
       parti,
       payment: debit,
       receipt: credit,
@@ -66,10 +66,8 @@ function SummaryFormattedTable({ data, fromDate, toDate, form }) {
     };
   });
 
-  const groupName = `${subGlCode} - ${glName}`;
-
   return (
-    <div className="oc-table-wrapper">
+    <div className="oc-table-wrapper summary-border-override">
       <div className="oc-meta-grid">
         <div className="oc-meta-left">
           <div className="oc-meta-row">
@@ -96,41 +94,169 @@ function SummaryFormattedTable({ data, fromDate, toDate, form }) {
       <table className="oc-table">
         <thead>
           <tr>
-            <th colSpan="9" className="title-row">{title}</th>
+            <th colSpan="8" className="title-row">{title}</th>
           </tr>
           <tr>
-            <th style={{textAlign: "center"}}>Sr No</th>
-            <th style={{textAlign: "center"}}>Effect Date</th>
-            <th>A/C No</th>
-            <th>Customer Name</th>
-            <th>Particulars</th>
-            <th className="num">Payment</th>
-            <th className="num">Receipt</th>
-            <th className="num">Balance</th>
-            <th style={{textAlign: "center"}}>Type</th>
+            <th style={{textAlign: "center"}}>Sr no</th>
+            <th style={{textAlign: "center", width: "90px"}}>Voucher DT</th>
+            <th style={{textAlign: "center", width: "60px"}}>Set No</th>
+            <th>Narration</th>
+            <th className="num">CREDIT</th>
+            <th className="num">DEBIT</th>
+            <th className="num">BALANCE</th>
+            <th style={{textAlign: "center"}}>DR/CR</th>
           </tr>
         </thead>
         <tbody>
-          <tr className="group-row">
-            <td colSpan="9" style={{fontStyle: 'italic', textDecoration: 'underline', color: '#000'}}>{groupName}</td>
-          </tr>
           {items.map((item, i) => (
             <tr key={i}>
               <td style={{textAlign: "center"}}>{item.index}</td>
               <td style={{textAlign: "center"}}>{item.edate}</td>
-              <td>{item.accno}</td>
-              <td>{item.custname}</td>
+              <td style={{textAlign: "center"}}>{item.setno}</td>
               <td style={{maxWidth: "300px", whiteSpace: "normal"}}>{item.parti}</td>
-              <td className="num">{fmt(item.payment)}</td>
-              <td className="num">{fmt(item.receipt)}</td>
+              <td className="num">{item.receipt > 0 ? fmt(item.receipt) : ""}</td>
+              <td className="num">{item.payment > 0 ? fmt(item.payment) : ""}</td>
               <td className="num">{fmt(Math.abs(item.closing))}</td>
               <td style={{textAlign: "center"}}>{item.type}</td>
             </tr>
           ))}
           <tr style={{ fontWeight: "bold", color: "#000", background: "#fff" }}>
-            <td colSpan="5" style={{ textAlign: "right", paddingRight: "10px" }}>Total :</td>
-            <td className="num">{fmt(totalPayment)}</td>
+            <td colSpan="4" style={{ textAlign: "right", paddingRight: "10px" }}>Total :</td>
             <td className="num">{fmt(totalReceipt)}</td>
+            <td className="num">{fmt(totalPayment)}</td>
+            <td colSpan="2"></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  );
+}
+
+function DetailsFormattedTable({ data, fromDate, toDate, form }) {
+  if (!data || data.length === 0) return null;
+
+  const first = data[0];
+  const bankName = first.BANKNAME || "SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI";
+  const userId = "Rohini";
+  const printDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+  
+  const subGlCode = form.productTypeInput || "";
+  const glName = form.productName || "";
+  const formattedFromDate = fromDate ? fromDate.split('-').reverse().join('/') : "";
+  const formattedToDate = toDate ? toDate.split('-').reverse().join('/') : "";
+  const title = `${subGlCode} - ${glName} Office Account Statement report From ${formattedFromDate} To ${formattedToDate}`;
+
+  let totalPayment = 0;
+  let totalReceipt = 0;
+
+  const items = data.map((row, index) => {
+    const edate = row.EDATE || (row.ENTRYDATE ? new Date(row.ENTRYDATE).toLocaleDateString('en-GB').replace(/\//g, '-') : "");
+    const custno = row.CUSTNO || row.CustNo || (row.ACCNO ? "0" : "");
+    const accno = row.ACCNO || "";
+    const custname = row.CUSTNAME || "";
+    const setno = row.SETNO || "";
+    let parti = row.PARTI || "";
+    if (row.PARTI1) parti += " " + row.PARTI1;
+    const paymentMode = row.Activity || "";
+    const chequeNo = row.INSTNO || (row.ACCNO ? "000000" : "");
+    const bankNameRow = row.BankName || "";
+    
+    const credit = parseFloat(row.Credit || row.CREDIT) || 0;
+    const debit = parseFloat(row.Debit || row.DEBIT) || 0;
+    const closing = parseFloat(row.Closing || row.ClosingBal || row.BALANCE) || 0;
+
+    totalPayment += debit;
+    totalReceipt += credit;
+
+    return {
+      index: index + 1,
+      edate,
+      custno,
+      accno,
+      custname,
+      setno,
+      parti,
+      paymentMode,
+      chequeNo,
+      bankNameRow,
+      payment: debit,
+      receipt: credit,
+      closing,
+      type: closing >= 0 ? "CR" : "DR"
+    };
+  });
+
+  return (
+    <div className="oc-table-wrapper summary-border-override">
+      <div className="oc-meta-grid">
+        <div className="oc-meta-left">
+          <div className="oc-meta-row">
+            <span className="oc-meta-key">Bank Name</span>
+            <span>: {bankName}</span>
+          </div>
+          <div className="oc-meta-row">
+            <span className="oc-meta-key">Branch Name</span>
+            <span>: {first.MIDNAME || first.MidName || "HEAD OFFICE"}</span>
+          </div>
+        </div>
+        <div className="oc-meta-right">
+          <div className="oc-meta-row">
+            <span className="oc-meta-key">User ID</span>
+            <span>: {userId}</span>
+          </div>
+          <div className="oc-meta-row">
+            <span className="oc-meta-key">Print Date</span>
+            <span>: {printDate}</span>
+          </div>
+        </div>
+      </div>
+      
+      <table className="oc-table details-table">
+        <thead>
+          <tr>
+            <th colSpan="14" className="title-row">{title}</th>
+          </tr>
+          <tr>
+            <th style={{textAlign: "center"}}>ID</th>
+            <th style={{textAlign: "center", width: "75px"}}>DATE</th>
+            <th>Cust No</th>
+            <th>ACC NO</th>
+            <th>CUST NAME</th>
+            <th style={{textAlign: "center"}}>SETNO</th>
+            <th>Particulars</th>
+            <th>Payment Mode</th>
+            <th>Cheque NO</th>
+            <th>Bank Name</th>
+            <th className="num">DEBIT</th>
+            <th className="num">CREDIT</th>
+            <th className="num">BALANCE</th>
+            <th style={{textAlign: "center"}}>DRCR</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, i) => (
+            <tr key={i}>
+              <td style={{textAlign: "center"}}>{item.index}</td>
+              <td style={{textAlign: "center"}}>{item.edate}</td>
+              <td>{item.custno}</td>
+              <td>{item.accno}</td>
+              <td style={{whiteSpace: "nowrap"}}>{item.custname}</td>
+              <td style={{textAlign: "center"}}>{item.setno}</td>
+              <td style={{maxWidth: "200px", whiteSpace: "normal"}}>{item.parti}</td>
+              <td>{item.paymentMode}</td>
+              <td>{item.chequeNo}</td>
+              <td>{item.bankNameRow}</td>
+              <td className="num">{item.payment.toFixed(2)}</td>
+              <td className="num">{item.receipt.toFixed(2)}</td>
+              <td className="num">{fmt(Math.abs(item.closing))}</td>
+              <td style={{textAlign: "center"}}>{item.type}</td>
+            </tr>
+          ))}
+          <tr style={{ fontWeight: "bold", color: "#000", background: "#fff" }}>
+            <td colSpan="10" style={{ textAlign: "right", paddingRight: "10px" }}>Total :</td>
+            <td className="num">{totalPayment.toFixed(2)}</td>
+            <td className="num">{totalReceipt.toFixed(2)}</td>
             <td colSpan="2"></td>
           </tr>
         </tbody>
@@ -246,6 +372,108 @@ function DayWiseFormattedTable({ data, fromDate, toDate, form }) {
   );
 }
 
+function MonthWiseFormattedTable({ data, fromDate, toDate, form }) {
+  if (!data || data.length === 0) return null;
+
+  const first = data[0];
+  const bankName = first.BANKNAME || "SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI";
+  const userId = "Rohini";
+  const printDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+  
+  const formattedFromDate = fromDate ? fromDate.split('-').reverse().join('/') : "";
+  const formattedToDate = toDate ? toDate.split('-').reverse().join('/') : "";
+  const title = `Product Summary From ${formattedFromDate} To ${formattedToDate}`;
+
+  let totalOpening = 0;
+  let totalCredit = 0;
+  let totalDebit = 0;
+  let totalClosing = 0;
+
+  const items = data.map((row, index) => {
+    const dateVal = row.Date || row.ENTRYDATE || row.Month || row.month || "";
+    const opening = parseFloat(row.Opening || row.OpeningBal || row["Opening Bal"] || row.OPENING) || 0;
+    const credit = parseFloat(row.Credit || row.CREDIT || row.Receipt || row.RECEIPT) || 0;
+    const debit = parseFloat(row.Debit || row.DEBIT || row.Payment || row.PAYMENT) || 0;
+    const closing = parseFloat(row.Closing || row.ClosingBal || row["Closing Bal"] || row.BALANCE) || 0;
+
+    totalOpening += opening;
+    totalCredit += credit;  
+    totalDebit += debit;
+    totalClosing += closing;
+
+    return {
+      index: index + 1,
+      dateVal,
+      opening,
+      credit,
+      debit,
+      closing
+    };
+  });
+
+  return (
+    <div className="oc-table-wrapper summary-border-override">
+      <div className="oc-meta-grid">
+        <div className="oc-meta-left">
+          <div className="oc-meta-row">
+            <span className="oc-meta-key">Bank Name</span>
+            <span>: {bankName}</span>
+          </div>
+          <div className="oc-meta-row">
+            <span className="oc-meta-key">Branch Name</span>
+            <span>: {first.MIDNAME || first.MidName || "HEAD OFFICE"}</span>
+          </div>
+        </div>
+        <div className="oc-meta-right">
+          <div className="oc-meta-row">
+            <span className="oc-meta-key">User ID</span>
+            <span>: {userId}</span>
+          </div>
+          <div className="oc-meta-row">
+            <span className="oc-meta-key">Print Date</span>
+            <span>: {printDate}</span>
+          </div>
+        </div>
+      </div>
+      
+      <table className="oc-table">
+        <thead>
+          <tr>
+            <th colSpan="6" className="title-row">{title}</th>
+          </tr>
+          <tr>
+            <th style={{textAlign: "center"}}>Sr No</th>
+            <th>Date</th>
+            <th className="num">Opening Bal</th>
+            <th className="num">Credit</th>
+            <th className="num">Debit</th>
+            <th className="num">Closing Bal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, i) => (
+            <tr key={i}>
+              <td style={{textAlign: "center"}}>{item.index}</td>
+              <td>{item.dateVal}</td>
+              <td className="num">{fmt(item.opening)}</td>
+              <td className="num">{fmt(item.credit)}</td>
+              <td className="num">{fmt(item.debit)}</td>
+              <td className="num">{fmt(item.closing)}</td>
+            </tr>
+          ))}
+          <tr style={{ fontWeight: "bold", color: "#000", background: "#fff" }}>
+            <td colSpan="2" style={{ textAlign: "right", paddingRight: "10px" }}></td>
+            <td className="num">{fmt(totalOpening)}</td>
+            <td className="num">{fmt(totalCredit)}</td>
+            <td className="num">{fmt(totalDebit)}</td>
+            <td className="num">{fmt(totalClosing)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function GeneralLedgerWise() {
   const [form, setForm] = useState({
     reportType:       "Details",
@@ -287,6 +515,37 @@ function GeneralLedgerWise() {
     }, 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [form.productTypeInput, form.branchCode]);
+
+  // Dynamically manage print orientation style to override any other loaded stylesheets
+  useEffect(() => {
+    const existing = document.getElementById("print-page-style-override");
+    if (existing) {
+      existing.remove();
+    }
+
+    const style = document.createElement("style");
+    style.id = "print-page-style-override";
+    
+    const size = form.reportType === "Details" ? "legal landscape" : "A4 portrait";
+    const margin = form.reportType === "Details" ? "5mm" : "10mm";
+    
+    style.innerHTML = `
+      @media print {
+        @page {
+          size: ${size};
+          margin: ${margin};
+        }
+      }
+    `;
+    document.body.appendChild(style);
+
+    return () => {
+      const el = document.getElementById("print-page-style-override");
+      if (el) {
+        el.remove();
+      }
+    };
+  }, [form.reportType, printMode]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -390,7 +649,6 @@ function GeneralLedgerWise() {
       <style type="text/css">
         {`
           @media print {
-            @page { size: A4 portrait; margin: 10mm; }
             body, html, #root, .glw-wrapper, .layout-body, .main-content { background: #fff !important; }
             
             .oc-table-wrapper { width: 100% !important; margin: 0 !important; }
@@ -399,6 +657,14 @@ function GeneralLedgerWise() {
               padding: 4px 6px !important; 
               border: 1px solid #000 !important; 
               font-size: 12px !important;
+            }
+            .summary-border-override .oc-table th, .summary-border-override .oc-table td {
+              border: 1px solid #ccc !important;
+            }
+            .details-table th, .details-table td {
+              font-size: 10px !important;
+              padding: 3px 4px !important;
+              border: 1px solid #ccc !important;
             }
             .oc-table th.title-row { 
               border-top: 2px solid #000 !important; 
@@ -538,6 +804,10 @@ function GeneralLedgerWise() {
           <SummaryFormattedTable data={reportData} fromDate={form.fromDate} toDate={form.toDate} form={form} />
         ) : form.reportType === "Day Wise" && printMode === "report" ? (
           <DayWiseFormattedTable data={reportData} fromDate={form.fromDate} toDate={form.toDate} form={form} />
+        ) : form.reportType === "Details" && printMode === "report" ? (
+          <DetailsFormattedTable data={reportData} fromDate={form.fromDate} toDate={form.toDate} form={form} />
+        ) : form.reportType === "Month Wise" && printMode === "report" ? (
+          <MonthWiseFormattedTable data={reportData} fromDate={form.fromDate} toDate={form.toDate} form={form} />
         ) : (
           <div className="glw-table-wrapper">
 

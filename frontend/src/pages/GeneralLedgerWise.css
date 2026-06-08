@@ -320,7 +320,7 @@
 }
 
 
-.oc-table-wrapper { width: 100%; margin-top: 10px; background: #fff; }
+.oc-table-wrapper { width: 100%; margin-top: 10px; background: #fff; overflow-x: auto; }
 .oc-meta-grid { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; font-weight: bold; color: #000; font-family: sans-serif; }
 .oc-meta-left, .oc-meta-right { display: flex; flex-direction: column; gap: 4px; }
 .oc-meta-row { display: flex; gap: 5px; }
@@ -333,5 +333,25 @@
 .oc-table .title-row { border-top: 2px solid #000; border-bottom: 2px solid #000; border-left: none; border-right: none; font-size: 14px; text-align: center; }
 .page-break-container { page-break-after: always; break-after: page; margin-bottom: 20px; }
 .page-break-container:last-child { page-break-after: auto; break-after: auto; margin-bottom: 0; }
-@media print { @page { size: A4 portrait; margin: 10mm; } .oc-table-wrapper { width: 100%; } .oc-meta-grid { font-size: 16px; margin-bottom: 15px; } .oc-table { font-size: 16px; } .oc-table th, .oc-table td { padding: 10px 5px !important; border: 1px solid #000; } }
+
+/* Thin border override for screen as well */
+.summary-border-override .oc-table {
+  border: 1px solid #ccc;
+}
+.summary-border-override .oc-table th,
+.summary-border-override .oc-table td {
+  border: 1px solid #ccc;
+}
+.details-table {
+  font-size: 11px;
+  border: 1px solid #ccc;
+}
+.details-table th,
+.details-table td {
+  font-size: 10px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+}
+
+@media print { .oc-table-wrapper { width: 100%; } .oc-meta-grid { font-size: 16px; margin-bottom: 15px; } .oc-table { font-size: 16px; } .oc-table th, .oc-table td { padding: 10px 5px !important; border: 1px solid #000; } }
 @media print { .oc-table th.title-row { border-left: none !important; border-right: none !important; border-top: 2px solid #000 !important; border-bottom: 2px solid #000 !important; } }
