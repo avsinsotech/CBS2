@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cbsapi.avsinsotech.com:8596";
+const BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 
 // Shared: build query params for SMS SP
 const buildSMSParams = ({ fromDate, toDate, fromBrcd, toBrcd, mobileType, mobileNo }) => {
@@ -47,7 +47,7 @@ export default function SMSReport() {
 
     try {
       const params   = buildSMSParams({ fromDate, toDate, fromBrcd, toBrcd, mobileType, mobileNo });
-      const response = await fetch(`${API_BASE_URL}/api/sms-report/report?${params}`);
+      const response = await fetch(`${BASE_URL}/api/sms-master-report?${params}`);
       const data     = await response.json();
       if (!response.ok) throw new Error(data.error || data.details || "API request failed");
       setResults(data);
@@ -65,45 +65,13 @@ export default function SMSReport() {
 
     const params = buildSMSParams({ fromDate, toDate, fromBrcd, toBrcd, mobileType, mobileNo });
     // Opens the plain-text endpoint directly in a new tab
-    window.open(`${API_BASE_URL}/api/sms-report/text-report-view?${params}`, '_blank');
+    window.open(`${BASE_URL}/api/sms-text-report-view?${params}`, '_blank');
   };
 
   const handleClearAll = () => {
-    setFromDate("2025-04-01"); 
-    setToDate("2026-03-30"); 
-    setFromBrcd("1"); 
-    setToBrcd("1");
-    setMobileType("all"); 
-    setMobileNo(""); 
-    setTextReportName("");
-    setResults(null); 
-    setError(null);
-  };
-
-  const handleDownloadCsv = () => {
-    if (!results || !results.data || !results.data.length) return;
-    const reportData = results.data;
-    const headers = Object.keys(reportData[0]).join(',');
-    const rows = reportData.map(row => 
-      Object.values(row).map(val => {
-        let str = String(val ?? '');
-        str = str.replace(/"/g, '""');
-        if (str.includes(',') || str.includes('\n') || str.includes('"')) {
-          str = `"${str}"`;
-        }
-        return str;
-      }).join(',')
-    );
-    const csvContent = [headers, ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `sms_report_${fromDate}_${toDate}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    setFromDate(""); setToDate(""); setFromBrcd(""); setToBrcd("");
+    setMobileType("all"); setMobileNo(""); setTextReportName("");
+    setResults(null); setError(null);
   };
 
   return (
@@ -186,9 +154,7 @@ export default function SMSReport() {
           <button style={styles.btnPrimary} disabled={loading}>Trial SMS</button>
 
           <button style={styles.btnOutline} onClick={handleClearAll}>Clear All</button>
-          {results && results.data && results.data.length > 0 && (
-            <button style={styles.btnExcel} onClick={handleDownloadCsv}>Export CSV</button>
-          )}
+          <button style={styles.btnOutline}>Exit</button>
 
           {/* Text Report View → opens plain text in new tab */}
           <button style={styles.btnPrimary} onClick={handleTextReportView} disabled={loading}>
@@ -204,11 +170,11 @@ export default function SMSReport() {
           <div style={styles.tableWrapper}>
             <div style={styles.tableHeader}>
               {results.rowCount} record(s) &nbsp;|&nbsp;
-              {results.parameters?.fdate} → {results.parameters?.tdate} &nbsp;|&nbsp;
-              BRCD: {results.parameters?.fbrcd}→{results.parameters?.tbrcd} &nbsp;|&nbsp;
-              {results.parameters?.mobile === "0" ? "All Customers" : `Mobile: ${results.parameters?.mobile}`}
+              {results.parameters.fdate} → {results.parameters.tdate} &nbsp;|&nbsp;
+              BRCD: {results.parameters.fbrcd}→{results.parameters.tbrcd} &nbsp;|&nbsp;
+              {results.parameters.mobile === "0" ? "All Customers" : `Mobile: ${results.parameters.mobile}`}
             </div>
-            <div style={{ overflowX: "auto", maxHeight: "400px" }}>
+            <div style={{ overflowX: "auto" }}>
               <table style={styles.table}>
                 <thead>
                   <tr>{Object.keys(results.data[0]).map((col) => <th key={col} style={styles.th}>{col}</th>)}</tr>
@@ -236,7 +202,7 @@ export default function SMSReport() {
 
 const styles = {
   card:          { background: "white", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", fontFamily: "'Poppins', sans-serif", border: "1px solid #e2e8f0" },
-  cardHeader:    { background: "linear-gradient(90deg, #334155, #334155)", padding: "12px 20px" },
+  cardHeader:    { background: "linear-gradient(90deg, #0d9488, #14b8a6)", padding: "12px 20px" },
   cardTitle:     { color: "white", margin: 0, fontSize: 15, fontWeight: 600, letterSpacing: 0.5 },
   cardBody:      { padding: "20px 24px 24px" },
   formRow:       { display: "flex", alignItems: "flex-start", marginBottom: 14, gap: 16, flexWrap: "wrap" },
@@ -257,14 +223,13 @@ const styles = {
   loadingBox:    { background: "#f0fdfa", border: "1px solid #99f6e4", color: "#0f766e", borderRadius: 6, padding: "10px 14px", fontSize: 12, marginTop: 12 },
   noDataBox:     { background: "#f9fafb", border: "1px solid #e5e7eb", color: "#6b7280", borderRadius: 6, padding: "10px 14px", fontSize: 12, marginTop: 12, textAlign: "center" },
   btnRow:        { display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 8 },
-  btnPrimary:    { height: 32, padding: "0 20px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none", color: "white", background: "linear-gradient(90deg, #334155, #334155)", fontFamily: "'Poppins',sans-serif" },
-  btnExcel:      { height: 32, padding: "0 20px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", background: "linear-gradient(90deg, #10b981, #059669)", border: "none", color: "white", fontFamily: "'Poppins',sans-serif" },
+  btnPrimary:    { height: 32, padding: "0 20px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none", color: "white", background: "linear-gradient(90deg, #0d9488, #14b8a6)", fontFamily: "'Poppins',sans-serif" },
   btnOutline:    { height: 32, padding: "0 20px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", background: "white", border: "1px solid #9ca3af", color: "#374151", fontFamily: "'Poppins',sans-serif" },
   tableWrapper:  { marginTop: 20, borderRadius: 8, overflow: "hidden", border: "1px solid #e5e7eb" },
-  tableHeader:   { background: "linear-gradient(90deg, #334155, #334155)", color: "white", padding: "8px 14px", fontSize: 12, fontWeight: 600 },
+  tableHeader:   { background: "linear-gradient(90deg, #0d9488, #14b8a6)", color: "white", padding: "8px 14px", fontSize: 12, fontWeight: 600 },
   table:         { width: "100%", borderCollapse: "collapse", fontSize: 11 },
-  th:            { background: "#f8fafc", color: "#475569", padding: "8px 10px", textAlign: "left", fontWeight: 600, borderBottom: "1px solid #e2e8f0", whiteSpace: "nowrap" },
+  th:            { background: "#f0fdfa", color: "#134e4a", padding: "8px 10px", textAlign: "left", fontWeight: 600, borderBottom: "1px solid #ccfbf1", whiteSpace: "nowrap" },
   td:            { padding: "7px 10px", color: "#1e293b", borderBottom: "1px solid #f1f5f9", whiteSpace: "nowrap" },
   trEven:        { background: "white" },
-  trOdd:         { background: "#f8fafc" },
+  trOdd:         { background: "#f0fdfa" },
 };

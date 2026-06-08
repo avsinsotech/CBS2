@@ -3,10 +3,19 @@
 import { useState } from "react";
 import "./TrialBalance.css";
 
-const API_BASE = (import.meta.env.VITE_API_URL || "https://cbsapi.avsinsotech.com:8596") + "/api/trial-balance";
+const API_BASE = "https://cbsapi.avsinsotech.com:8596/api/trial-balance";
+
+// Format numbers with 2 decimal places and Indian locale
+const fmt = (v) => {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v ?? "";
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 // Helper: convert dd/mm/yyyy → yyyy-mm-dd for the backend
 function toISO(ddmmyyyy) {
   if (!ddmmyyyy) return "";
+  if (ddmmyyyy.includes("-")) return ddmmyyyy; // already ISO format
   const parts = ddmmyyyy.split("/");
   if (parts.length !== 3) return ddmmyyyy;
   return `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -16,8 +25,8 @@ function TrialBalance() {
   const [form, setForm] = useState({
     reportType: "Details Wise",
     branchCode: "1",
-    toDate: "30/03/2026",
-    fromDate: "",
+    toDate: "2026-03-30",
+    fromDate: "2025-04-01",
     sortType: "Code Wise",
     textReportName: "",
   });
@@ -25,7 +34,6 @@ function TrialBalance() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [tableData, setTableData] = useState([]);
-  const [currentFlag, setCurrentFlag] = useState("SUBMIT");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -34,10 +42,9 @@ function TrialBalance() {
   const isFromTo = form.reportType === "FromTo";
 
   // ── Submit: call backend ──────────────────────────────────────────────────
-  const handleSubmit = async (flag = "SUBMIT") => {
+  const handleSubmit = async () => {
     setError("");
     setTableData([]);
-    setCurrentFlag(flag);
 
     // Validation
     if (!form.branchCode || !form.toDate) {
@@ -59,7 +66,6 @@ function TrialBalance() {
       fromDate: fromDateISO,
       toDate: toDateISO,
       codeOrName,
-      flag,
     });
 
     try {
@@ -77,58 +83,6 @@ function TrialBalance() {
       setLoading(false);
     }
   };
-
-  // ── Text Format handlers ──────────────────────────────────────────────────
-  const handleTextDownload = () => {
-    if (!form.branchCode || !form.toDate) {
-      setError("Branch Code and To Date are required for text generation.");
-      return;
-    }
-    if (isFromTo && !form.fromDate) {
-      setError("From Date is required for FromTo report.");
-      return;
-    }
-    const fromDateISO = isFromTo ? toISO(form.fromDate) : toISO(form.toDate);
-    const toDateISO = toISO(form.toDate);
-    const codeOrName = form.sortType === "Code Wise" ? "C" : "N";
-
-    const params = new URLSearchParams({
-      branchCode: form.branchCode,
-      fromDate: fromDateISO,
-      toDate: toDateISO,
-      codeOrName,
-      flag: currentFlag,
-      mode: "download",
-      textReportName: form.textReportName || "trial_balance",
-    });
-    window.open(`${API_BASE}/report?${params.toString()}`, "_blank");
-  };
-
-  const handleTextReportView = () => {
-    if (!form.branchCode || !form.toDate) {
-      setError("Branch Code and To Date are required for text generation.");
-      return;
-    }
-    if (isFromTo && !form.fromDate) {
-      setError("From Date is required for FromTo report.");
-      return;
-    }
-    const fromDateISO = isFromTo ? toISO(form.fromDate) : toISO(form.toDate);
-    const toDateISO = toISO(form.toDate);
-    const codeOrName = form.sortType === "Code Wise" ? "C" : "N";
-
-    const params = new URLSearchParams({
-      branchCode: form.branchCode,
-      fromDate: fromDateISO,
-      toDate: toDateISO,
-      codeOrName,
-      flag: currentFlag,
-      mode: "text",
-      textReportName: form.textReportName || "trial_balance",
-    });
-    window.open(`${API_BASE}/report?${params.toString()}`, "_blank");
-  };
-
 
   // ── Table columns derived from first row ─────────────────────────────────
   const columns = tableData.length > 0 ? Object.keys(tableData[0]) : [];
@@ -174,9 +128,9 @@ function TrialBalance() {
             <div className="tb-field">
               <label>To Date <span className="req">*</span></label>
               <input
+                type="date"
                 className="tb-input"
                 name="toDate"
-                placeholder="dd/mm/yyyy"
                 value={form.toDate}
                 onChange={handleChange}
               />
@@ -185,9 +139,9 @@ function TrialBalance() {
               <div className="tb-field">
                 <label>From Date <span className="req">*</span></label>
                 <input
+                  type="date"
                   className="tb-input"
                   name="fromDate"
-                  placeholder="dd/mm/yyyy"
                   value={form.fromDate}
                   onChange={handleChange}
                 />
@@ -234,39 +188,16 @@ function TrialBalance() {
         <div className="tb-footer">
           <button
             className="tb-btn tb-btn-primary"
-            onClick={() => handleSubmit("SUBMIT")}
+            onClick={handleSubmit}
             disabled={loading}
           >
-            {loading && currentFlag === "SUBMIT" ? "Loading…" : "Submit"}
+            {loading ? "Loading…" : "Submit"}
           </button>
-          <button
-            className="tb-btn"
-            onClick={() => handleSubmit("LAZER")}
-            disabled={loading}
-          >
-            {loading && currentFlag === "LAZER" ? "Loading…" : "Lazer"}
-          </button>
-          <button
-            className="tb-btn"
-            onClick={handleTextDownload}
-            disabled={loading}
-          >
-            Text
-          </button>
-          <button
-            className="tb-btn"
-            onClick={handleTextReportView}
-            disabled={loading}
-          >
-            Text Report View
-          </button>
-          <button
-            className="tb-btn"
-            onClick={() => handleSubmit("TB_FORMAT1")}
-            disabled={loading}
-          >
-            {loading && currentFlag === "TB_FORMAT1" ? "Loading…" : "TB Format1"}
-          </button>
+          {["Lazer", "Text", "Text Report View", "TB Format1"].map((btn) => (
+            <button key={btn} className="tb-btn" onClick={() => alert(btn)}>
+              {btn}
+            </button>
+          ))}
         </div>
 
         {/* RESULTS TABLE */}
@@ -284,8 +215,8 @@ function TrialBalance() {
                 {tableData.map((row, i) => (
                   <tr key={i}>
                     {columns.map((col) => (
-                      <td key={col}>{row[col] ?? ""}</td>
-                    ))}
+                    <td key={col}>{typeof row[col] === 'number' ? fmt(row[col]) : (row[col] ?? "")}</td>
+                  ))}
                   </tr>
                 ))}
               </tbody>
