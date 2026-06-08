@@ -1,261 +1,297 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+/* ─────────────────────────────────────────────────────────────── */
+/* DebitEntryReport.css */
+/* ─────────────────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+}
 
 .der-wrapper {
-  padding: 24px;
-  background: #f0f2f5;
-  min-height: calc(100vh - 74px);
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f5f5;
 }
 
-/* CARD */
+/* ── Form Card ────────────────────────────────────────────────── */
 .der-card {
-  background: #ffffff;
-  border: 1.5px solid #d1d5db;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
-/* HEADER */
 .der-header {
-  background: linear-gradient(90deg, #4a7ba7, #5b8fc7);
-  color: #ffffff;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  padding: 15px 20px;
   font-size: 18px;
   font-weight: 600;
-  padding: 14px 20px;
-  letter-spacing: 0.5px;
+  border-radius: 4px 4px 0 0;
 }
 
-/* BODY */
 .der-body {
-  padding: 24px;
-  background: #ffffff;
+  padding: 20px;
 }
 
-/* ROW — flex layout */
+/* ── Form Rows ────────────────────────────────────────────────– */
 .der-row {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
   flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-/* LABEL */
 .der-label {
-  font-size: 14px;
   font-weight: 500;
-  color: #374151;
-  min-width: 140px;
-  white-space: nowrap;
+  min-width: 120px;
+  color: #2c3e50;
+  font-size: 14px;
 }
 
 .der-label-inline {
+  min-width: 100px;
+  margin-left: 10px;
+}
+
+.der-label-wrap {
+  flex-basis: 100%;
   min-width: auto;
-  margin-left: 12px;
 }
 
-/* INPUT */
-.der-input {
-  border: 1.5px solid #d1d5db;
+/* ── Form Inputs ──────────────────────────────────────────────– */
+.der-input,
+.der-select {
+  padding: 8px 10px;
+  border: 1px solid #bdc3c7;
   border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-family: 'Poppins', sans-serif;
-  color: #374151;
-  background: #ffffff;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.3s;
+}
+
+.der-input:focus,
+.der-select:focus {
   outline: none;
-  transition: border-color 0.2s ease;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
 }
 
-.der-input:focus {
-  border-color: #4a7ba7;
-  box-shadow: 0 0 0 3px rgba(74, 123, 167, 0.12);
-}
-
-.der-input::placeholder {
-  color: #9ca3af;
-}
-
-.der-input-small {
+.der-input-brcd {
   width: 80px;
 }
 
-.der-input-medium {
-  width: 180px;
+.der-input-brname {
+  flex: 1;
+  min-width: 180px;
 }
 
-.der-input-large {
-  width: 320px;
+.der-input-date {
+  width: 140px;
 }
 
-/* SELECT */
+.der-input-reportname {
+  flex: 1;
+  min-width: 250px;
+}
+
+.der-input-productname {
+  flex: 1;
+  min-width: 200px;
+}
+
 .der-select {
-  border: 1.5px solid #d1d5db;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-family: 'Poppins', sans-serif;
-  color: #374151;
-  background: #ffffff;
-  outline: none;
+  flex: 1;
+  min-width: 250px;
   cursor: pointer;
-  width: 220px;
-  transition: border-color 0.2s ease;
 }
 
-.der-select:focus {
-  border-color: #4a7ba7;
-  box-shadow: 0 0 0 3px rgba(74, 123, 167, 0.12);
+.der-select-product {
+  flex: 1;
+  min-width: 300px;
 }
 
-/* FOOTER */
-.der-footer {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: #f8f9fb;
-  flex-wrap: wrap;
-}
-
-/* BUTTONS */
-.der-btn {
-  height: 38px;
-  padding: 0 28px;
-  border: none;
-  border-radius: 4px;
-  color: #ffffff;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.15s ease;
-}
-
-.der-btn:hover {
-  opacity: 0.88;
-  transform: translateY(-2px);
-}
-
-.der-btn:active {
-  transform: translateY(0);
-}
-
-.der-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.der-btn-primary {
-  background: linear-gradient(90deg, #4a7ba7, #5b8fc7);
-  box-shadow: 0 2px 4px rgba(74, 123, 167, 0.3);
-}
-
-.der-btn-primary:hover {
-  opacity: 0.85;
-  box-shadow: 0 4px 8px rgba(74, 123, 167, 0.4);
-}
-
-/* ERROR & LOADING */
+/* ── Error & Loading Messages ─────────────────────────────────– */
 .der-error {
-  color: #c0392b;
-  font-size: 0.85rem;
-  margin: 0 0 12px 0;
+  color: #e74c3c;
+  background-color: #fadbd8;
+  border-left: 4px solid #e74c3c;
   padding: 10px 12px;
-  background: #fee2e2;
-  border-left: 4px solid #c0392b;
-  border-radius: 2px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 .der-loading {
-  color: #2980b9;
-  font-size: 0.85rem;
-  margin: 0 0 12px 0;
+  color: #3498db;
+  background-color: #d6eaf8;
+  border-left: 4px solid #3498db;
   padding: 10px 12px;
-  background: #dbeafe;
-  border-left: 4px solid #2980b9;
-  border-radius: 2px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
-/* REPORT TABLE */
+/* ── Footer Buttons ───────────────────────────────────────────– */
+.der-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.der-btn {
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.der-btn:hover:not(:disabled) {
+  background-color: #2980b9;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.4);
+}
+
+.der-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ── Table Wrapper ────────────────────────────────────────────– */
 .der-table-wrapper {
-  margin-top: 28px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 20px;
   overflow-x: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.der-print-header {
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.der-print-header h2 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.der-print-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+/* ── Table Styling ────────────────────────────────────────────– */
 .der-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.85rem;
+  font-size: 14px;
 }
 
-.der-table th,
-.der-table td {
-  border: 1px solid #d1d5db;
-  padding: 10px 12px;
+.der-table thead {
+  background-color: #ecf0f1;
+  border-bottom: 2px solid #bdc3c7;
+}
+
+.der-th {
+  padding: 12px 10px;
   text-align: left;
-  white-space: nowrap;
-  color: #374151;
-}
-
-.der-table thead tr {
-  background: linear-gradient(90deg, #4a7ba7, #5b8fc7);
-}
-
-.der-table thead tr th {
-  color: #ffffff;
   font-weight: 600;
-  letter-spacing: 0.3px;
+  color: #2c3e50;
+  border-right: 1px solid #bdc3c7;
+  border-bottom: 1px solid #bdc3c7;
 }
 
-.der-table tbody tr:nth-child(even) {
-  background-color: #f4f6f8;
+.der-th:last-child {
+  border-right: none;
+}
+
+.der-th-numeric,
+.der-th-currency {
+  text-align: right;
+  padding-right: 15px;
+}
+
+/* ── Table Body Rows ──────────────────────────────────────────– */
+.der-table tbody tr {
+  border-bottom: 1px solid #ecf0f1;
+  transition: background-color 0.2s;
 }
 
 .der-table tbody tr:hover {
-  background-color: #e6f0f7;
+  background-color: #f8f9fa;
 }
 
-.der-record-count {
-  margin-top: 10px;
-  font-size: 0.8rem;
-  color: #6b7280;
+.der-row-even {
+  background-color: white;
+}
+
+.der-row-odd {
+  background-color: #f9f9f9;
+}
+
+.der-td {
+  padding: 10px;
+  border-right: 1px solid #ecf0f1;
+  text-align: left;
+}
+
+.der-td:last-child {
+  border-right: none;
+}
+
+.der-td-numeric,
+.der-td-currency {
   text-align: right;
+  padding-right: 15px;
+  font-family: 'Courier New', monospace;
 }
 
-/* PRINT STYLES */
+/* ── Record Count ─────────────────────────────────────────────– */
+.der-record-count {
+  padding: 15px 20px;
+  text-align: right;
+  font-size: 14px;
+  color: #2c3e50;
+  background-color: #f9f9f9;
+  border-top: 1px solid #ddd;
+  margin: 0;
+}
+
+/* ── No Data Message ──────────────────────────────────────────– */
+.der-no-data {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+  font-size: 16px;
+}
+
+/* ── Print Styles ─────────────────────────────────────────────– */
+.no-print {
+  display: block;
+}
+
 .print-only {
   display: none;
 }
 
-.der-print-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.der-print-header h2 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #4a7ba7;
-  margin: 0 0 6px 0;
-}
-
-.der-print-header p {
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin: 0;
-}
-
 @media print {
-
-  .navbar,
-  .sidebar,
   .no-print {
     display: none !important;
   }
@@ -264,52 +300,81 @@
     display: block !important;
   }
 
-  .layout-wrapper,
-  .layout-body,
-  .main-content,
-  .page-content {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-    padding: 0 !important;
-    margin: 0 !important;
+  .der-wrapper {
+    background: white;
+    padding: 0;
   }
 
-  .der-wrapper {
-    padding: 0;
-    background: #ffffff;
-    min-height: unset;
-    margin: 0 !important;
-    width: 100% !important;
+  .der-card {
+    box-shadow: none;
+    border: none;
+    margin-bottom: 0;
   }
 
   .der-table-wrapper {
-    margin-top: 0;
-    overflow: visible;
+    box-shadow: none;
+    border: 1px solid #333;
   }
 
   .der-table {
-    width: 100%;
+    font-size: 12px;
   }
 
-  .der-table th,
-  .der-table td {
-    font-size: 0.75rem;
-    padding: 6px 8px;
+  .der-th {
+    background-color: #e8e8e8;
+    border: 1px solid #333;
+    padding: 8px;
   }
 
-  .der-table thead tr {
-    background: #4a7ba7 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  .der-td {
+    border: 1px solid #333;
+    padding: 8px;
   }
 
-  .der-table tbody tr:hover {
-    background-color: transparent;
+  .der-print-header {
+    page-break-after: avoid;
   }
 
-  .der-record-count {
-    display: none;
+  @page {
+    margin: 0.5in;
+  }
+}
+
+/* ── Responsive Design ────────────────────────────────────────– */
+@media (max-width: 768px) {
+  .der-wrapper {
+    padding: 10px;
+  }
+
+  .der-body {
+    padding: 15px;
+  }
+
+  .der-label {
+    min-width: 100px;
+  }
+
+  .der-row {
+    gap: 5px;
+  }
+
+  .der-input,
+  .der-select {
+    font-size: 13px;
+    padding: 7px 8px;
+  }
+
+  .der-table-wrapper {
+    font-size: 12px;
+  }
+
+  .der-th,
+  .der-td {
+    padding: 8px;
+  }
+
+  .der-btn {
+    padding: 8px 15px;
+    font-size: 13px;
   }
 }

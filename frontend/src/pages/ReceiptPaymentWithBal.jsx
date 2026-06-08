@@ -1,206 +1,8 @@
-
-
-// import { useState } from "react";
-// import "./ReceiptPaymentWithBal.css";
-
-// const API_BASE_URL = "http://localhost:5000";
-
-// function toISO(raw) {
-//   const parts = raw.trim().split("/");
-//   if (parts.length !== 3) return null;
-//   let [d, m, y] = parts;
-//   if (y.length === 2) y = "20" + y;
-//   return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-// }
-
-// function isValidDate(raw) {
-//   const parts = raw.trim().split("/");
-//   if (parts.length !== 3) return false;
-//   const [d, m] = parts.map(Number);
-//   return d >= 1 && d <= 31 && m >= 1 && m <= 12;
-// }
-
-// const ENDPOINT_MAP = {
-//   "English":   "/api/rec-pay-balance/english",
-//   "Marathi":   "/api/rec-pay-balance/marathi",
-//   "Skip Data": "/api/rec-pay-balance/skip-data",
-// };
-
-// function ReceiptPaymentWithBal() {
-//   const [form, setForm] = useState({
-//     selectType: "Skip Data",
-//     branchCode: "1",
-//     fromDate:   "01/04/2025",
-//     toDate:     "30/03/2026",
-//   });
-
-//   const [reportData, setReportData] = useState([]);
-//   const [columns,    setColumns]    = useState([]);
-//   const [loading,    setLoading]    = useState(false);
-//   const [error,      setError]      = useState("");
-//   const [fetched,    setFetched]    = useState(false);
-
-//   const handleChange = (e) => {
-//     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-//     setFetched(false);
-//     setError("");
-//   };
-
-//   const validate = () => {
-//     if (!form.branchCode.trim())     return "Branch Code is required.";
-//     if (!isValidDate(form.fromDate)) return "From Date must be in DD/MM/YYYY format.";
-//     if (!isValidDate(form.toDate))   return "To Date must be in DD/MM/YYYY format.";
-//     return null;
-//   };
-
-//   const fetchData = async () => {
-//     const err = validate();
-//     if (err) { setError(err); return null; }
-
-//     const path = ENDPOINT_MAP[form.selectType];
-//     const params = new URLSearchParams({
-//       BRCD: form.branchCode.trim(),
-//       PFDT: toISO(form.fromDate),
-//       PTDT: toISO(form.toDate),
-//     });
-
-//     const url = `${API_BASE_URL}${path}?${params}`;
-
-//     setLoading(true);
-//     setError("");
-//     setFetched(false);
-
-//     try {
-//       const res = await fetch(url);
-//       if (!res.ok) {
-//         const body = await res.json().catch(() => ({}));
-//         throw new Error(body.error || `Server error: ${res.status}`);
-//       }
-//       const data = await res.json();
-//       setColumns(data.length > 0 ? Object.keys(data[0]) : []);
-//       setReportData(data);
-//       setFetched(true);
-//       return data;
-//     } catch (err) {
-//       setError(err.message || "Failed to fetch report.");
-//       return null;
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handlePrint = async () => {
-//     const data = fetched ? reportData : await fetchData();
-//     if (data && data.length > 0) setTimeout(() => window.print(), 400);
-//   };
-
-//   return (
-//     <div className="rpb-wrapper">
-//       <div className="rpb-card no-print">
-//         <div className="rpb-header">Receipt &amp; Payment With Balance Report</div>
-
-//         <div className="rpb-form-section">
-
-//           {/* Select Type */}
-//           <div className="rpb-row">
-//             <label className="rpb-label">Select Type <span className="req">*</span></label>
-//             <div className="rpb-radio-group">
-//               {["English", "Marathi", "Skip Data"].map((opt) => (
-//                 <label key={opt} className="rpb-radio-label">
-//                   <input type="radio" name="selectType" value={opt}
-//                     checked={form.selectType === opt} onChange={handleChange} />
-//                   {opt}
-//                 </label>
-//               ))}
-//             </div>
-//           </div>
-
-//           {/* Branch Code */}
-//           <div className="rpb-row">
-//             <label className="rpb-label">Branch Code</label>
-//             <input className="rpb-input rpb-input-shaded" name="branchCode"
-//               value={form.branchCode} onChange={handleChange} />
-//           </div>
-
-//           {/* From / To Date */}
-//           <div className="rpb-row">
-//             <label className="rpb-label">From Date</label>
-//             <input className="rpb-input" name="fromDate"
-//               value={form.fromDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
-//             <label className="rpb-inline-label">To Date</label>
-//             <input className="rpb-input" name="toDate"
-//               value={form.toDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
-//           </div>
-
-//           {/* Error */}
-//           {error && <p className="rpb-error">{error}</p>}
-
-//           {/* Loading bar */}
-//           {loading && (
-//             <div className="rpb-loading-bar">
-//               <div className="rpb-loading-fill" />
-//             </div>
-//           )}
-
-//         </div>
-
-//         {/* Footer */}
-//         <div className="rpb-footer">
-//           <button className="rpb-btn" onClick={fetchData} disabled={loading}>
-//             {loading ? "Loading…" : "View Report"}
-//           </button>
-//           <button className="rpb-btn rpb-btn-print" onClick={handlePrint} disabled={loading}>
-//             Print Report
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Results table */}
-//       {fetched && reportData.length > 0 && (
-//         <div className="rpb-table-wrapper">
-//           <div className="print-only rpb-print-header">
-//             <h2>Receipt &amp; Payment With Balance Report</h2>
-//             <p>
-//               Type: {form.selectType} &nbsp;|&nbsp;
-//               Branch: {form.branchCode} &nbsp;|&nbsp;
-//               From: {form.fromDate} &nbsp;|&nbsp;
-//               To: {form.toDate} &nbsp;|&nbsp;
-//               Date Printed: {new Date().toLocaleDateString()}
-//             </p>
-//           </div>
-
-//           <table className="rpb-table">
-//             <thead>
-//               <tr>{columns.map((col) => <th key={col}>{col}</th>)}</tr>
-//             </thead>
-//             <tbody>
-//               {reportData.map((row, i) => (
-//                 <tr key={i}>
-//                   {columns.map((col) => <td key={col}>{row[col] ?? ""}</td>)}
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-
-//           <p className="rpb-record-count no-print">Total Records: {reportData.length}</p>
-//         </div>
-//       )}
-
-//       {fetched && reportData.length === 0 && !loading && (
-//         <p className="rpb-error no-print" style={{ margin: "16px" }}>
-//           No records found for the given criteria.
-//         </p>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default ReceiptPaymentWithBal;
-
 import { useState, useRef } from "react";
 import "./ReceiptPaymentWithBal.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cbsapi.avsinsotech.com:8596";
+// const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+const API_BASE_URL = "http://localhost:5000";
 function toISO(raw) {
   const parts = raw.trim().split("/");
   if (parts.length !== 3) return null;
@@ -230,30 +32,29 @@ const fmt = (v) => {
 };
 
 // ── Formatted Report Component (matches the picture exactly) ─────────────────
-function RPBReportFormatted({ data, fromDate, toDate }) {
+function RPBReportFormatted({ data, fromDate, toDate, bankName, branchName, userId }) {
   const printDate = new Date().toLocaleDateString("en-GB");
 
-  // Detect column names from first row
-  const keys = data.length > 0 ? Object.keys(data[0]) : [];
+  // ── Build GL display name: "GL - GLName" (e.g. "01 - CASH Opening") ──
+  const fmtGlName = (glCode, glName) => {
+    if (!glCode && !glName) return "";
+    if (!glName) return glCode || "";
+    if (!glCode) return glName;
+    return `${glCode} - ${glName}`;
+  };
 
-  // Try to detect Receipt vs Payment columns from data shape
-  // Common patterns from SP: REC_GLNAME / PAY_GLNAME or GLNAME + CREDIT/DEBIT
-  // We'll render dynamically but map to the 8-column layout shown in picture:
-  // Receipt: SrNo | GL Name | Credit Amt | Balance
-  // Payment: GL Name | Debit Amt | Balance | DrCr
+  // ── Determine DrCr from payment balance ──
+  const getDrCr = (row) => {
+    const payBal = parseFloat(row.PayClBal);
+    if (isNaN(payBal) || payBal === 0) return "CR";
+    return "CR";
+  };
 
-  // Detect key names (handle different SP naming conventions)
-  const recGlName   = keys.find(k => /rec.*gl|gl.*rec|r_gl|rglname/i.test(k)) || keys[0] || "";
-  const recCredit   = keys.find(k => /credit/i.test(k)) || "";
-  const recBalance  = keys.find(k => /rec.*bal|r_bal|rbalance/i.test(k)) || keys.find(k => /balance/i.test(k)) || "";
-  const payGlName   = keys.find(k => /pay.*gl|gl.*pay|p_gl|pglname/i.test(k)) || "";
-  const payDebit    = keys.find(k => /debit/i.test(k)) || "";
-  const payBalance  = keys.find(k => /pay.*bal|p_bal|pbalance/i.test(k)) || (recBalance !== keys.find(k => /balance/i.test(k)) ? keys.find(k => /balance/i.test(k)) : "");
-  const drCr        = keys.find(k => /drcr|dr_cr|drorcr/i.test(k)) || "";
-
-  // Fallback: if SP returns all columns in one row (horizontal layout like PL report)
-  // Map positionally if named detection fails
-  const hasRecPay = recGlName && payGlName;
+  // ── Compute totals ──
+  const totalRecAmt   = data.reduce((sum, r) => sum + (parseFloat(r.RecAmt) || 0), 0);
+  const totalRecBal   = data.reduce((sum, r) => sum + (parseFloat(r.RecClBal) || 0), 0);
+  const totalPayAmt   = data.reduce((sum, r) => sum + (parseFloat(r.PayAmt) || 0), 0);
+  const totalPayBal   = data.reduce((sum, r) => sum + (parseFloat(r.PayClBal) || 0), 0);
 
   return (
     <div className="rpb-formatted-report">
@@ -264,12 +65,12 @@ function RPBReportFormatted({ data, fromDate, toDate }) {
           <div className="rpb-fmt-meta-row">
             <span className="rpb-fmt-meta-key">Name</span>
             <span className="rpb-fmt-meta-sep">:</span>
-            <span className="rpb-fmt-meta-val">SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI</span>
+            <span className="rpb-fmt-meta-val">{bankName || ""}</span>
           </div>
           <div className="rpb-fmt-meta-row">
             <span className="rpb-fmt-meta-key">Branch Name</span>
             <span className="rpb-fmt-meta-sep">:</span>
-            <span className="rpb-fmt-meta-val">HEAD OFFICE</span>
+            <span className="rpb-fmt-meta-val">{branchName || ""}</span>
           </div>
         </div>
         <div className="rpb-fmt-meta-right">
@@ -281,7 +82,7 @@ function RPBReportFormatted({ data, fromDate, toDate }) {
           <div className="rpb-fmt-meta-row">
             <span className="rpb-fmt-meta-key">Print UserID</span>
             <span className="rpb-fmt-meta-sep">:</span>
-            <span className="rpb-fmt-meta-val">Rohini</span>
+            <span className="rpb-fmt-meta-val">{userId || ""}</span>
           </div>
         </div>
       </div>
@@ -318,30 +119,40 @@ function RPBReportFormatted({ data, fromDate, toDate }) {
               <td className="rpb-fmt-td rpb-fmt-col-srno">{index + 1}</td>
               {/* Receipt side */}
               <td className="rpb-fmt-td rpb-fmt-col-glname">
-                {hasRecPay ? row[recGlName] : row[keys[0]] ?? ""}
+                {fmtGlName(row.RecGl, row.RecGlName)}
               </td>
               <td className="rpb-fmt-td rpb-fmt-col-amt rpb-fmt-num">
-                {fmt(hasRecPay ? row[recCredit] : row[keys[1]])}
+                {fmt(row.RecAmt)}
               </td>
               <td className="rpb-fmt-td rpb-fmt-col-bal rpb-fmt-num">
-                {fmt(hasRecPay ? row[recBalance] : row[keys[2]])}
+                {fmt(row.RecClBal)}
               </td>
               {/* Payment side */}
               <td className="rpb-fmt-td rpb-fmt-col-glname">
-                {hasRecPay ? row[payGlName] : row[keys[3]] ?? ""}
+                {fmtGlName(row.PayGl, row.PayGlName)}
               </td>
               <td className="rpb-fmt-td rpb-fmt-col-amt rpb-fmt-num">
-                {fmt(hasRecPay ? row[payDebit] : row[keys[4]])}
+                {fmt(row.PayAmt)}
               </td>
               <td className="rpb-fmt-td rpb-fmt-col-bal rpb-fmt-num">
-                {fmt(hasRecPay ? row[payBalance] : row[keys[5]])}
+                {fmt(row.PayClBal)}
               </td>
               <td className="rpb-fmt-td rpb-fmt-col-drcr">
-                {hasRecPay ? row[drCr] : row[keys[6]] ?? ""}
+                {getDrCr(row)}
               </td>
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr className="rpb-fmt-total-row">
+            <td colSpan="2" className="rpb-fmt-td rpb-fmt-total-label">Toatl Receipt :</td>
+            <td className="rpb-fmt-td rpb-fmt-col-amt rpb-fmt-num rpb-fmt-total-val">{fmt(totalRecAmt)}</td>
+            <td className="rpb-fmt-td rpb-fmt-col-bal rpb-fmt-num rpb-fmt-total-val">{fmt(totalRecBal)}</td>
+            <td colSpan="2" className="rpb-fmt-td rpb-fmt-total-label" style={{textAlign: "right"}}>Total Payment :</td>
+            <td className="rpb-fmt-td rpb-fmt-col-bal rpb-fmt-num rpb-fmt-total-val">{fmt(totalPayAmt)}</td>
+            <td className="rpb-fmt-td rpb-fmt-col-drcr rpb-fmt-num rpb-fmt-total-val">{fmt(totalPayBal)}</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );
@@ -362,6 +173,7 @@ function ReceiptPaymentWithBal() {
   const [error,      setError]      = useState("");
   const [fetched,    setFetched]    = useState(false);
   const [activeButton, setActiveButton] = useState("");
+  const [bankInfo,   setBankInfo]   = useState({ bankName: "", branchName: "" });
   const reportRef = useRef(null);
 
   const handleChange = (e) => {
@@ -401,6 +213,15 @@ function ReceiptPaymentWithBal() {
       setColumns(data.length > 0 ? Object.keys(data[0]) : []);
       setReportData(data);
       setFetched(true);
+
+      // Fetch bank/branch info
+      try {
+        const infoRes = await fetch(`${API_BASE_URL}/api/bank-info?BRCD=${form.branchCode.trim()}`);
+        if (infoRes.ok) {
+          const info = await infoRes.json();
+          setBankInfo(info);
+        }
+      } catch (e) { /* ignore */ }
       return data;
     } catch (err) {
       setError(err.message || "Failed to fetch report.");
@@ -410,17 +231,21 @@ function ReceiptPaymentWithBal() {
     }
   };
 
-  // ── View Report (grid) ────────────────────────────────────────────────────
+  // ── View Report (formatted report in preview) ──────────────────────────────
   const handleViewReport = async () => {
     setActiveButton("view");
     await fetchData();
   };
 
-  // ── Print Report (formatted) ──────────────────────────────────────────────
+  // ── Print Report (open print window directly) ─────────────────────────────
   const handlePrintReport = async () => {
     setActiveButton("print");
     const data = fetched ? reportData : await fetchData();
     if (!data || data.length === 0) return;
+    // Wait for next render so reportRef has the formatted content
+    setTimeout(() => {
+      handlePrintWindow();
+    }, 300);
   };
 
   // ── Open print window ─────────────────────────────────────────────────────
@@ -452,6 +277,9 @@ function ReceiptPaymentWithBal() {
             .rpb-fmt-col-bal { width: 10%; text-align: right; }
             .rpb-fmt-col-drcr { width: 4%; text-align: center; }
             .rpb-fmt-row-alt { background: #f9f9f9; }
+            .rpb-fmt-total-row { background: #f0f0f0; }
+            .rpb-fmt-total-label { font-weight: 700; font-size: 9px; text-align: right; }
+            .rpb-fmt-total-val { font-weight: 700; font-size: 9px; }
           </style>
         </head>
         <body>${reportRef.current.innerHTML}</body>
@@ -461,8 +289,7 @@ function ReceiptPaymentWithBal() {
     printWindow.print();
   };
 
-  const showFormattedReport = activeButton === "print" && fetched && reportData.length > 0;
-  const showGridReport      = activeButton === "view"  && fetched && reportData.length > 0;
+  const showReport = fetched && reportData.length > 0;
 
   return (
     <div className="rpb-wrapper">
@@ -538,40 +365,19 @@ function ReceiptPaymentWithBal() {
             <span className="rpb-preview-empty">No records found for the given criteria.</span>
           )}
 
-          {/* Formatted Report (Print Report button) */}
-          {!loading && showFormattedReport && (
+          {/* Formatted Report (always rendered when data exists, for both view and print) */}
+          {!loading && showReport && (
             <div className="rpb-report-wrapper">
-              <div className="rpb-report-toolbar">
-                <button className="rpb-btn rpb-btn-sm" onClick={handlePrintWindow}>
-                  🖨️ Print Report
-                </button>
-              </div>
               <div ref={reportRef}>
                 <RPBReportFormatted
                   data={reportData}
                   fromDate={form.fromDate}
                   toDate={form.toDate}
+                  bankName={bankInfo.bankName}
+                  branchName={bankInfo.branchName}
+                  userId={"AVS"}
                 />
               </div>
-            </div>
-          )}
-
-          {/* Grid View (View Report button) */}
-          {!loading && showGridReport && (
-            <div className="rpb-table-wrapper">
-              <table className="rpb-table">
-                <thead>
-                  <tr>{columns.map((col) => <th key={col}>{col}</th>)}</tr>
-                </thead>
-                <tbody>
-                  {reportData.map((row, i) => (
-                    <tr key={i}>
-                      {columns.map((col) => <td key={col}>{row[col] ?? ""}</td>)}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="rpb-record-count">Total Records: {reportData.length}</p>
             </div>
           )}
         </div>

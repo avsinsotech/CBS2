@@ -274,11 +274,6 @@
   .no-print   { display: none !important; }
   .print-only { display: block !important; }
 
-  @page {
-    size: landscape;
-    margin: 10mm;
-  }
-
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -342,5 +337,120 @@
 
   .bgl-table tbody tr:nth-child(even) {
     background: #f3f4f6 !important;
+  }
+}
+
+/* ─── custom formatted table for Opening Closing Details ─── */
+.oc-table-wrapper {
+  background: #ffffff;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-top: 20px;
+}
+
+.oc-meta-grid {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111;
+}
+
+.oc-meta-left, .oc-meta-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.oc-meta-row {
+  display: flex;
+  gap: 15px;
+}
+
+.oc-meta-key {
+  width: 100px;
+  font-weight: 600;
+}
+
+.oc-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  margin: 20px 0 10px 0;
+  color: #111;
+}
+
+.oc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  border: 1px solid #c0c0c0;
+}
+
+.oc-table th {
+  border: 1px solid #c0c0c0;
+  padding: 8px;
+  font-weight: bold;
+  background-color: #f8f9fa;
+  color: #000;
+  text-align: left;
+}
+
+.oc-table td {
+  border: 1px solid #c0c0c0;
+  padding: 6px 8px;
+  color: #111;
+}
+
+.oc-table .num {
+  text-align: right;
+}
+
+.oc-table .group-row td {
+  font-weight: bold;
+  color: #a00000; /* Red color for branch */
+  background: #fff;
+  border: 1px solid #c0c0c0;
+  padding: 8px;
+}
+
+.page-break-container {
+  page-break-after: always;
+  break-after: page;
+  margin-bottom: 20px;
+}
+.page-break-container:last-child {
+  page-break-after: auto;
+  break-after: auto;
+  margin-bottom: 0;
+}
+
+@media print {
+  @page {
+    size: legal landscape;
+    margin: 0mm; /* This removes the browser's default header and footer */
+  }
+  .oc-table-wrapper {
+    border: none;
+    margin: 0;
+    padding: 6mm 10mm; /* Safely replicate margins inside the container */
+  }
+  .oc-meta-grid {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .oc-title {
+    font-size: 11px;
+    margin: 4px 0;
+  }
+  .oc-table {
+    font-size: 9px;
+  }
+  .oc-table th, .oc-table td {
+    padding: 1.5px 4px !important;
+  }
+  .oc-table .group-row td {
+    padding: 1.5px 4px !important;
   }
 }

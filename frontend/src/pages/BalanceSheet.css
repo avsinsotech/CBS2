@@ -356,3 +356,90 @@
     padding: 6px;
   }
 }
+/* --- classic table overrides --- */
+.bs-classic-table thead { background: #f8f9fa !important; color: #333 !important; }
+.bs-classic-table thead th { border: 1px solid #c0c0c0 !important; color: #333 !important; font-weight: normal !important; padding: 4px 6px !important; }
+.bs-classic-table tbody td { border: 1px solid #c0c0c0 !important; padding: 4px 6px !important; }
+
+/* ── Formatted BS Report Styles ── */
+.bs-formatted-report {
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-top: 15px;
+}
+
+.bs-fmt-meta-grid {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.bs-fmt-meta-left, .bs-fmt-meta-right {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.bs-fmt-meta-center {
+  text-align: center;
+}
+.bs-fmt-meta-row {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: #000;
+  font-family: 'Poppins', sans-serif;
+}
+.bs-fmt-meta-key {
+  font-weight: 600;
+  min-width: 90px;
+}
+.bs-fmt-meta-sep { font-weight: 600; }
+.bs-fmt-meta-val { color: #000; }
+
+.bs-fmt-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  margin: 0;
+  color: #c00000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.bs-fmt-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 1.5px solid #000;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+}
+.bs-fmt-table th, .bs-fmt-table td {
+  border: 1px solid #000;
+  padding: 4px 6px;
+  text-align: left;
+  color: #000;
+}
+.bs-fmt-col-head-row th {
+  background: #ffffff;
+  font-weight: 700;
+  border-bottom: 1.5px solid #000;
+  text-align: center;
+}
+.bs-fmt-group {
+  font-weight: 700;
+  font-style: italic;
+  text-decoration: underline;
+  color: #c00000 !important;
+}
+.bs-fmt-outer-val {
+  font-weight: 700;
+  color: #c00000 !important;
+}
+.bs-fmt-num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+.bs-fmt-col-name { width: 35%; }
+.bs-fmt-col-bal { width: 15%; }
+.bs-fmt-col-outer { width: 15%; }
+

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./DailyPositionReport.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cbsapi.avsinsotech.com:8596";
 
 const parseDate = (raw) => {
   const parts = raw.trim().split("/");
@@ -10,6 +10,20 @@ const parseDate = (raw) => {
   if (y.length === 2) y = "20" + y;
   return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 };
+
+// ── Fixed columns returned by RptDailyPositionList_Prev ──────
+const COLUMNS = [
+  { key: "SrNo",       label: "Sr No"       },
+  { key: "BRCD",       label: "BRCD"        },
+  { key: "BranchName", label: "Branch Name" },
+  { key: "Deposit",    label: "Deposit"     },
+  { key: "Loans",      label: "Loans"       },
+  { key: "CDRatio",    label: "CD Ratio"    },
+];
+
+// Key variants the SP might return — normalised to the keys above
+const CD_RATIO_KEYS = ["CDRatio", "CD RATIO", "CdRatio", "CD_RATIO", "CDRatio_Prev"];
+const BRCD_KEYS     = ["BRCD", "BranchCode", "Brcd", "brcd", "BranchCode", "BRANCHCODE"];
 
 function DailyPositionReport() {
   const [form, setForm] = useState({
@@ -21,7 +35,6 @@ function DailyPositionReport() {
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState("");
   const [reportData, setReportData] = useState([]);
-  const [columns,    setColumns]    = useState([]);
   const [fetched,    setFetched]    = useState(false);
   const [printMode,  setPrintMode]  = useState("");
 
@@ -45,6 +58,25 @@ function DailyPositionReport() {
       textReportName: form.textReportName,
     }).toString();
 
+  // Normalise a raw row so keys always match COLUMNS
+  const normaliseRow = (row) => {
+    const normalised = { ...row };
+
+    // Handle CD Ratio key variants
+    const cdKey = CD_RATIO_KEYS.find((k) => k in row);
+    if (cdKey && cdKey !== "CDRatio") {
+      normalised["CDRatio"] = row[cdKey];
+    }
+
+    // Handle BRCD key variants
+    const brcdKey = BRCD_KEYS.find((k) => k in row);
+    if (brcdKey && brcdKey !== "BRCD") {
+      normalised["BRCD"] = row[brcdKey];
+    }
+
+    return normalised;
+  };
+
   const fetchData = async (mode) => {
     const validationError = validate();
     if (validationError) { setError(validationError); return null; }
@@ -64,10 +96,11 @@ function DailyPositionReport() {
       }
 
       const result = await response.json();
-      const data   = Array.isArray(result) ? result : result.data || [];
+      const raw    = Array.isArray(result) ? result : result.data || [];
+      if (raw.length > 0) console.log('SP raw keys:', Object.keys(raw[0]));
+      const data   = raw.map(normaliseRow);
 
       setReportData(data);
-      setColumns(data.length > 0 ? Object.keys(data[0]) : []);
       setFetched(true);
       return data;
     } catch (err) {
@@ -85,13 +118,10 @@ function DailyPositionReport() {
     const data = fetched ? reportData : await fetchData("textdownload");
     if (!data || data.length === 0) return;
 
-    const headers = Object.keys(data[0]);
     const csv = [
-      headers.join(","),
+      COLUMNS.map((c) => c.label).join(","),
       ...data.map((row) =>
-        headers
-          .map((h) => `"${(row[h] ?? "").toString().replace(/"/g, '""')}"`)
-          .join(",")
+        COLUMNS.map((c) => `"${(row[c.key] ?? "").toString().replace(/"/g, '""')}"`).join(",")
       ),
     ].join("\n");
 
@@ -119,7 +149,6 @@ function DailyPositionReport() {
       textReportName: "",
     });
     setReportData([]);
-    setColumns([]);
     setError("");
     setFetched(false);
   };
@@ -191,7 +220,6 @@ function DailyPositionReport() {
               Loading... this may take up to 60 seconds.
             </p>
           )}
-
         </div>
 
         {/* FOOTER BUTTONS */}
@@ -212,7 +240,6 @@ function DailyPositionReport() {
             Back
           </button>
         </div>
-
       </div>
 
       {/* RESULT SECTION */}
@@ -235,13 +262,19 @@ function DailyPositionReport() {
             <>
               <table className="db-table">
                 <thead>
-                  <tr>{columns.map((col) => <th key={col}>{col}</th>)}</tr>
+                  <tr>
+                    {COLUMNS.map((col) => (
+                      <th key={col.key}>{col.label}</th>
+                    ))}
+                  </tr>
                 </thead>
                 <tbody>
                   {reportData.map((row, i) => (
                     <tr key={i}>
-                      {columns.map((col) => (
-                        <td key={col}>{row[col] ?? ""}</td>
+                      {COLUMNS.map((col) => (
+                        <td key={col.key}>
+                          {row[col.key] ?? ""}
+                        </td>
                       ))}
                     </tr>
                   ))}
