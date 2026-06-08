@@ -28,46 +28,90 @@ const executeCrarReport = async (req, res, responseMode = 'json') => {
             .input('OnDate', sql.DateTime, asOnDateStr ? new Date(asOnDateStr) : null)
             .execute('ISP_CRAR');
 
-        const rows = result.recordset || result.recordsets[0] || [];
+        const capitalFunds = result.recordsets[0] || [];
+        const riskAssets = result.recordsets[1] || [];
 
         if (responseMode === 'text') {
-            if (rows.length === 0) {
+            if (capitalFunds.length === 0 && riskAssets.length === 0) {
                 res.setHeader('Content-Type', 'text/plain');
                 return res.send('No records found.');
             }
 
-            const columns = Object.keys(rows[0]);
-            const colWidths = columns.map((col) =>
-                Math.max(col.length, ...rows.map((r) => String(r[col] ?? '').length))
-            );
+            // Calculate totals
+            const totalCapital = capitalFunds.length > 0 ? (capitalFunds[0].ctotal ?? 0) : 0;
+            const totalRiskAssets = riskAssets.length > 0 ? (riskAssets[0].atotal ?? 0) : 0;
+            const crarRatio = totalRiskAssets > 0 ? ((totalCapital / totalRiskAssets) * 100) : 0;
 
-            const separator = colWidths.map((w) => '-'.repeat(w + 2)).join('+');
-            const header    = columns.map((col, i) => col.padEnd(colWidths[i])).join(' | ');
-            const dataLines = rows.map((row) =>
-                columns.map((col, i) => String(row[col] ?? '').padEnd(colWidths[i])).join(' | ')
-            );
+            const formatNum = (val) => {
+                const num = parseFloat(val);
+                return isNaN(num) ? '0.00' : num.toFixed(2);
+            };
 
-            const reportLines = [
-                `CRAR REPORT`,
-                `Branch: ${branchCode}  As On Date: ${asOnDateStr}`,
-                `Generated: ${new Date().toISOString()}`,
-                `Total Records: ${rows.length}`,
-                '',
-                separator,
-                header,
-                separator,
-                ...dataLines,
-                separator,
-            ];
+            const lines = [];
+            lines.push('--------------------------------------------------------------------------------');
+            lines.push('           SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI            ');
+            lines.push('--------------------------------------------------------------------------------');
+            lines.push(`Report Name : Capital to Risk-Weighted Assets Ratio (CRAR) Report`);
+            lines.push(`Branch Code : ${branchCode}  As On Date : ${asOnDateStr}`);
+            lines.push(`Printed Date: ${new Date().toLocaleDateString('en-GB')} ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`);
+            lines.push('--------------------------------------------------------------------------------');
+            lines.push('');
+
+            // Capital Funds Section
+            lines.push('A. CAPITAL FUNDS (Tier-I & Tier-II Capital)');
+            lines.push('+-------+--------------------------------------------------+--------------------+');
+            lines.push('| Sr No | Description                                      |             Amount |');
+            lines.push('+-------+--------------------------------------------------+--------------------+');
+            capitalFunds.forEach(row => {
+                const sr = String(row.srno ?? '').padStart(5);
+                const desc = String(row.description ?? '').trim().padEnd(48);
+                const amt = formatNum(row.amount).padStart(18);
+                lines.push(`| ${sr} | ${desc} | ${amt} |`);
+            });
+            lines.push('+-------+--------------------------------------------------+--------------------+');
+            lines.push(`| TOTAL CAPITAL FUNDS (A)                                  | ${formatNum(totalCapital).padStart(18)} |`);
+            lines.push('+----------------------------------------------------------+--------------------+');
+            lines.push('');
+
+            // Risk Assets Section
+            lines.push('B. RISK-WEIGHTED ASSETS & EXPOSURE');
+            lines.push('+----+----------------------------+------------+-----------+------------+--------+----------------+');
+            lines.push('| Sr | Description                |     Amount | Provision |    Net Amt | Risk % | Adjusted Value |');
+            lines.push('+----+----------------------------+------------+-----------+------------+--------+----------------+');
+            riskAssets.forEach(row => {
+                const sr = String(row.srno ?? '').padStart(2);
+                const desc = String(row.description ?? '').trim().padEnd(26);
+                const amt = formatNum(row.amount).padStart(10);
+                const prov = formatNum(row.provision).padStart(9);
+                const net = formatNum(row.Amt).padStart(10);
+                const risk = String(row.RiskWeight ?? '0').padStart(6);
+                const adj = formatNum(row.Adjusted_Value).padStart(14);
+                lines.push(`| ${sr} | ${desc} | ${amt} | ${prov} | ${net} | ${risk} | ${adj} |`);
+            });
+            lines.push('+----+----------------------------+------------+-----------+------------+--------+----------------+');
+            lines.push(`| TOTAL RISK-WEIGHTED ASSETS (B)                                                 | ${formatNum(totalRiskAssets).padStart(14)} |`);
+            lines.push('+--------------------------------------------------------------------------------+----------------+');
+            lines.push('');
+
+            // CRAR Summary Section
+            lines.push('C. CRAR CALCULATION SUMMARY');
+            lines.push('--------------------------------------------------------------------------------');
+            lines.push(`1. Total Capital Funds (A)              : ${formatNum(totalCapital)}`);
+            lines.push(`2. Total Risk-Weighted Assets (B)       : ${formatNum(totalRiskAssets)}`);
+            lines.push(`3. Capital to Risk-Weighted Assets Ratio : ${crarRatio.toFixed(2)} %`);
+            lines.push('--------------------------------------------------------------------------------');
 
             res.setHeader('Content-Type', 'text/plain; charset=utf-8');
             res.setHeader('Content-Disposition', `inline; filename="crar_report_${asOnDateStr}.txt"`);
-            return res.send(reportLines.join('\n'));
+            return res.send(lines.join('\n'));
         }
 
         res.json({
             success: true,
-            data: rows,
+            data: {
+                capitalFunds,
+                riskAssets
+            },
             message: 'CRAR Report retrieved successfully.'
         });
 
