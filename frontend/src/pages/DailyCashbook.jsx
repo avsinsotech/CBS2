@@ -127,7 +127,8 @@
 // import { useState } from "react";
 // import "./CashBook.css";
 
-// const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+// const API_BASE_URL =
+//   import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // function CashBook() {
 //   const [form, setForm] = useState({
@@ -530,7 +531,7 @@ import { useState } from "react";
 import "./CashBook.css";
 
 const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
-  // const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+  // const API_BASE_URL =import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // DD/MM/YYYY → YYYY-MM-DD
 const parseDate = (raw) => {

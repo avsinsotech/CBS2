@@ -1,387 +1,340 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./DebitEntryReport.css";
 
-// const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 
-// ─── Helpers ──────────────────────────────────────────────────
-const isValidDDMMYYYY = (v) => /^\d{2}\/\d{2}\/\d{4}$/.test(v.trim());
-
-// Define column order and formatting
-const REPORT_COLUMNS = [
-  { key: "SubGlcode", label: "SubGlcode", type: "numeric", width: "80px" },
-  { key: "GlName", label: "GlName", type: "text", width: "200px" },
-  { key: "AccNo", label: "Acc No", type: "numeric", width: "80px" },
-  { key: "CustName", label: "Cust Name", type: "text", width: "200px" },
-  { key: "Opening", label: "Opening", type: "currency", width: "120px" },
-  { key: "Credit", label: "Credit", type: "currency", width: "120px" },
-  { key: "Debit", label: "Debit", type: "currency", width: "120px" },
-  { key: "Closing", label: "Closing", type: "currency", width: "120px" },
+// Mock branch data - replace with actual API call
+const BRANCH_OPTIONS = [
+  { id: "1", name: "HEAD OFFICE" },
+  { id: "2", name: "BRANCH 1" },
+  { id: "3", name: "BRANCH 2" },
+  { id: "4", name: "BRANCH 3" },
 ];
 
-const INITIAL_FORM = {
-  branchCode:   "1",
-  branchName:   "HEAD OFFICE",
-  productType:  "1",
-  productName:  "SB (SAVING DEPOSITS)",
-  fromDate:     "22/05/2026",
-  reportName:   "",
-};
-
-// Format numeric values
-const formatValue = (value, type) => {
-  if (value === null || value === undefined || value === "") return "";
-  
-  if (type === "currency") {
-    const num = parseFloat(value);
-    if (isNaN(num)) return value;
-    return num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-  
-  if (type === "numeric") {
-    const num = parseFloat(value);
-    if (isNaN(num)) return value;
-    return num.toLocaleString("en-IN");
-  }
-  
-  return value;
-};
+// Mock product type data
+const PRODUCT_TYPE_OPTIONS = [
+  "Savings Account",
+  "Current Account",
+  "Fixed Deposit",
+  "Loan",
+  "DDS",
+];
 
 function DebitEntryReport() {
-  const [form,       setForm]       = useState(INITIAL_FORM);
-  const [branchList, setBranchList] = useState([]);
-  const [glList,     setGlList]     = useState([]);
-  const [loading,    setLoading]    = useState(false);
-  const [error,      setError]      = useState("");
+  const [form, setForm] = useState({
+    branchCode: "1",
+    branchName: "HEAD OFFICE",
+    productType: "",
+    productName: "",
+    fromDate: "26/07/2025",
+    reportName: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [reportData, setReportData] = useState([]);
-  const [fetched,    setFetched]    = useState(false);
+  const [columns, setColumns] = useState([]);
+  const [fetched, setFetched] = useState(false);
 
-  // ── Load GL list (Product Type options) on mount & branch change ──
-  useEffect(() => {
-    const loadGLList = async () => {
-      try {
-        const res  = await fetch(
-          `${API_BASE_URL}/api/debit-entry-report/gl-list?brcd=${form.branchCode}`
-        );
-        const json = await res.json();
-        if (json.success) {
-          setGlList(json.data || []);
-        }
-      } catch {
-        // silently ignore — static fallback stays visible
-      }
-    };
-    loadGLList();
-  }, [form.branchCode]);
-
-  // ── Handlers ──────────────────────────────────────────────────
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: value,
+    });
     setFetched(false);
-    setError("");
   };
 
-  // Branch dropdown: sync code + name together
   const handleBranchChange = (e) => {
-    const selected = branchList.find((b) => b.id === e.target.value);
-    setForm((prev) => ({
-      ...prev,
-      branchCode: e.target.value,
-      branchName: selected ? selected.name : e.target.value,
-    }));
-    setFetched(false);
-    setError("");
-  };
-
-  // Product Type dropdown: sync code + name together
-  const handleProductTypeChange = (e) => {
-    const selectedCode = e.target.value;
-    const match = glList.find((g) => String(g.SUBGLCODE) === selectedCode);
-    setForm((prev) => ({
-      ...prev,
-      productType: selectedCode,
-      productName: match ? match.GLNAME : selectedCode,
-    }));
-    setFetched(false);
-    setError("");
-  };
-
-  // Product name text box — manual edit
-  const handleProductNameChange = (e) => {
-    setForm((prev) => ({ ...prev, productName: e.target.value }));
+    const branchId = e.target.value;
+    const branch = BRANCH_OPTIONS.find((b) => b.id === branchId);
+    setForm({
+      ...form,
+      branchCode: branchId,
+      branchName: branch ? branch.name : "",
+    });
     setFetched(false);
   };
 
-  // ── Validation ────────────────────────────────────────────────
   const validate = () => {
     if (!form.branchCode.trim()) return "Branch Code is required.";
-    if (!form.fromDate.trim())   return "From Date is required.";
-    if (!isValidDDMMYYYY(form.fromDate)) return "From Date must be DD/MM/YYYY.";
+    if (!form.branchName.trim()) return "Branch Name is required.";
+    if (!form.fromDate.trim()) return "From Date is required.";
     return null;
   };
 
-  // ── Core fetch ────────────────────────────────────────────────
-  const fetchReport = async () => {
-    const err = validate();
-    if (err) { setError(err); return null; }
+  const buildQuery = () => {
+    const params = new URLSearchParams({
+      branchCode: form.branchCode,
+      branchName: form.branchName,
+      productType: form.productType,
+      productName: form.productName,
+      fromDate: form.fromDate,
+      reportName: form.reportName,
+    });
+    return params.toString();
+  };
+
+  const fetchData = async (action) => {
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return null;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      const params = new URLSearchParams({
-        branchCode:  form.branchCode,
-        fromDate:    form.fromDate,
-        subGlCode:   form.productType,
-        productName: form.productName,
-        reportName:  form.reportName,
+      const url = `/api/debit-entry-report?${buildQuery()}&action=${action}`;
+
+      const response = await fetch(`${API_BASE_URL}${url}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       });
 
-      const res = await fetch(`${API_BASE_URL}/api/debit-entry-report?${params}`);
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.message || body.error || `Server error: ${res.status}`);
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(
+          body.error || body.message || `Server error: ${response.status}`
+        );
       }
 
-      const result = await res.json();
-      if (!result.success) throw new Error(result.message || "Request failed.");
+      const result = await response.json();
+      const data = Array.isArray(result) ? result : result.data || [];
 
-      const data = Array.isArray(result.data) ? result.data : [];
       setReportData(data);
+      setColumns(data.length > 0 ? Object.keys(data[0]) : []);
       setFetched(true);
+
       return data;
-    } catch (e) {
-      setError(e.message || "Failed to fetch report.");
-      setFetched(false);
+    } catch (err) {
+      setError(err.message || "Failed to fetch report.");
       return null;
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Submit ────────────────────────────────────────────────────
-  const handleSubmit = () => fetchReport();
+  const handleSubmit = async () => {
+    await fetchData("submit");
+  };
 
-  // ── Download as CSV ───────────────────────────────────────────
   const handleDownload = async () => {
     const validationError = validate();
-    if (validationError) { setError(validationError); return; }
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/debit-entry-report/download`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch(`${API_BASE_URL}/api/debit-entry-report/download`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          branchCode:  form.branchCode,
-          fromDate:    form.fromDate,
-          subGlCode:   form.productType,
+          branchCode: form.branchCode,
+          branchName: form.branchName,
+          productType: form.productType,
           productName: form.productName,
-          reportName:  form.reportName,
-          format:      "excel",
+          fromDate: form.fromDate,
+          reportName: form.reportName,
+          format: "excel",
         }),
       });
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.message || body.error || `Server error: ${res.status}`);
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(
+          body.error || body.message || `Server error: ${response.status}`
+        );
       }
 
-      const result = await res.json();
-      if (!result.success) throw new Error(result.message || "Download failed.");
-
+      const result = await response.json();
       const rows = result.data || [];
-      if (rows.length === 0) { setError("No records found to download."); return; }
 
-      // Use only the columns defined in REPORT_COLUMNS for CSV export
-      const headers = REPORT_COLUMNS.map(col => col.label);
-      const csv = [
-        headers.join(","),
-        ...rows.map((row) =>
-          REPORT_COLUMNS.map((col) => `"${row[col.key] ?? ""}"`).join(",")
-        ),
-      ].join("\n");
+      if (rows.length === 0) {
+        setError("No records found to download.");
+        return;
+      }
 
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url  = window.URL.createObjectURL(blob);
-      const a    = document.createElement("a");
-      a.href     = url;
-      a.download = (form.reportName || "DebitEntryReport") + ".csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const headers = Object.keys(rows[0]);
+      let csvContent =
+        headers.join(",") +
+        "\n" +
+        rows
+          .map((row) =>
+            headers
+              .map((header) =>
+                `"${row[header] !== null ? row[header] : ""}"`
+              )
+              .join(",")
+          )
+          .join("\n");
+
+      const blob = new Blob([csvContent], {
+        type: "text/csv;charset=utf-8;",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download =
+        (form.reportName || "DebitEntryReport") + ".csv";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       window.URL.revokeObjectURL(url);
-    } catch (e) {
-      setError(e.message || "Failed to download.");
+    } catch (err) {
+      setError(err.message || "Failed to download report.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Print ─────────────────────────────────────────────────────
   const handlePrint = async () => {
-    const data = fetched ? reportData : await fetchReport();
+    const data = (fetched) ? reportData : await fetchData("print");
     if (data && data.length > 0) {
-      setTimeout(() => window.print(), 400);
+      setTimeout(() => window.print(), 300);
     }
   };
 
-  // ─────────────────────────────────────────────────────────────
   return (
     <div className="der-wrapper">
       <div className="der-card no-print">
 
-        {/* ── Header ─────────────────────────────────────────── */}
+        {/* HEADER */}
         <div className="der-header">
           <span>Debit Entry Report</span>
         </div>
 
-        {/* ── Body ───────────────────────────────────────────── */}
+        {/* BODY */}
         <div className="der-body">
 
-          {/* ROW 1 — Brcd  |  Brcd name */}
+          {/* ROW 1: Brcd + Brcd name */}
           <div className="der-row">
             <label className="der-label">Brcd</label>
             <input
-              className="der-input der-input-brcd"
+              className="der-input der-input-small"
               name="branchCode"
               value={form.branchCode}
               onChange={handleChange}
-              placeholder="1"
+              placeholder="Branch Code"
             />
             <label className="der-label der-label-inline">Brcd name</label>
-            {branchList.length > 0 ? (
-              <select
-                className="der-select"
-                value={form.branchCode}
-                onChange={handleBranchChange}
-              >
-                {branchList.map((b) => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-            ) : (
-              /* Fallback editable text if branch API not wired yet */
-              <input
-                className="der-input der-input-brname"
-                name="branchName"
-                value={form.branchName}
-                onChange={handleChange}
-                placeholder="Branch Name"
-              />
-            )}
+            <select
+              className="der-select"
+              name="branchName"
+              value={form.branchCode}
+              onChange={handleBranchChange}
+            >
+              {BRANCH_OPTIONS.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* ROW 2 — Product Type code  |  Product Name (from GL lookup) */}
+          {/* ROW 2: Product Type + Product Name */}
           <div className="der-row">
             <label className="der-label">Product Type</label>
-            {glList.length > 0 ? (
-              <>
-                <input
-                  className="der-input der-input-brcd"
-                  name="productType"
-                  value={form.productType}
-                  onChange={(e) => {
-                    const code  = e.target.value;
-                    const match = glList.find((g) => String(g.SUBGLCODE) === code);
-                    setForm((prev) => ({
-                      ...prev,
-                      productType: code,
-                      productName: match ? match.GLNAME : prev.productName,
-                    }));
-                    setFetched(false);
-                  }}
-                  placeholder="Code"
-                />
-                <select
-                  className="der-select der-select-product"
-                  value={form.productType}
-                  onChange={handleProductTypeChange}
-                >
-                  <option value="">— Select —</option>
-                  {glList.map((g) => (
-                    <option key={g.SUBGLCODE} value={String(g.SUBGLCODE)}>
-                      {g.SUBGLCODE} – {g.GLNAME}
-                    </option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <>
-                <input
-                  className="der-input der-input-brcd"
-                  name="productType"
-                  value={form.productType}
-                  onChange={handleChange}
-                  placeholder="Code"
-                />
-                <input
-                  className="der-input der-input-productname"
-                  name="productName"
-                  value={form.productName}
-                  onChange={handleProductNameChange}
-                  placeholder="Product Name"
-                />
-              </>
-            )}
+            <select
+              className="der-input der-input-medium"
+              name="productType"
+              value={form.productType}
+              onChange={handleChange}
+            >
+              <option value="">Product Type</option>
+              {PRODUCT_TYPE_OPTIONS.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            <input
+              className="der-input der-input-large"
+              name="productName"
+              value={form.productName}
+              onChange={handleChange}
+              placeholder="PRODUCT NAME"
+            />
           </div>
 
-          {/* ROW 3 — From Date */}
+          {/* ROW 3: From Date */}
           <div className="der-row">
             <label className="der-label">From Date</label>
             <input
-              className="der-input der-input-date"
+              className="der-input der-input-medium"
               name="fromDate"
+              type="text"
               value={form.fromDate}
               onChange={handleChange}
               placeholder="DD/MM/YYYY"
             />
           </div>
 
-          {/* ROW 4 — Enter Text Report Name */}
+          {/* ROW 4: Report Name */}
           <div className="der-row">
-            <label className="der-label der-label-wrap">Enter Text Report Name</label>
+            <label className="der-label">Enter Text Report Name</label>
             <input
-              className="der-input der-input-reportname"
+              className="der-input der-input-medium"
               name="reportName"
               value={form.reportName}
               onChange={handleChange}
-              placeholder=""
+              placeholder="Report Name"
             />
           </div>
 
-          {/* Status messages */}
-          {error   && <p className="der-error">{error}</p>}
-          {loading && <p className="der-loading">Loading… please wait.</p>}
+          {/* ERROR / LOADING */}
+          {error && <p className="der-error">{error}</p>}
+          {loading && <p className="der-loading">Loading... please wait.</p>}
+
         </div>
 
-        {/* ── Footer buttons ──────────────────────────────────── */}
+        {/* FOOTER BUTTONS */}
         <div className="der-footer">
-          <button className="der-btn" onClick={handleSubmit}  disabled={loading}>
-            {loading ? "Loading…" : "Submit"}
+          <button
+            className="der-btn der-btn-primary"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Submit"}
           </button>
-          <button className="der-btn" onClick={handleDownload} disabled={loading}>
-            {loading ? "Loading…" : "Download"}
+          <button
+            className="der-btn der-btn-primary"
+            onClick={handleDownload}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Download"}
           </button>
-          <button className="der-btn" onClick={handlePrint}   disabled={loading}>
-            {loading ? "Loading…" : "Print"}
+          <button
+            className="der-btn der-btn-primary"
+            onClick={handlePrint}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Print"}
           </button>
         </div>
+
       </div>
 
-      {/* ── Report table ────────────────────────────────────────── */}
+      {/* REPORT TABLE */}
       {fetched && reportData.length > 0 && (
         <div className="der-table-wrapper">
-          {/* Print-only header */}
+
+          {/* Print header */}
           <div className="print-only der-print-header">
             <h2>Debit Entry Report</h2>
             <p>
-              Branch: {form.branchName}&nbsp;|&nbsp;
-              Product: {form.productName}&nbsp;|&nbsp;
-              From: {form.fromDate}&nbsp;|&nbsp;
+              Branch: {form.branchName} &nbsp;|&nbsp;
+              From: {form.fromDate} &nbsp;|&nbsp;
               Printed: {new Date().toLocaleDateString()}
             </p>
           </div>
@@ -389,20 +342,14 @@ function DebitEntryReport() {
           <table className="der-table">
             <thead>
               <tr>
-                {REPORT_COLUMNS.map((col) => (
-                  <th key={col.key} className={`der-th der-th-${col.type}`} style={{ width: col.width }}>
-                    {col.label}
-                  </th>
-                ))}
+                {columns.map((col) => <th key={col}>{col}</th>)}
               </tr>
             </thead>
             <tbody>
               {reportData.map((row, i) => (
-                <tr key={i} className={i % 2 === 0 ? "der-row-even" : "der-row-odd"}>
-                  {REPORT_COLUMNS.map((col) => (
-                    <td key={col.key} className={`der-td der-td-${col.type}`}>
-                      {formatValue(row[col.key], col.type)}
-                    </td>
+                <tr key={i}>
+                  {columns.map((col) => (
+                    <td key={col}>{row[col] ?? ""}</td>
                   ))}
                 </tr>
               ))}
@@ -410,13 +357,13 @@ function DebitEntryReport() {
           </table>
 
           <p className="der-record-count no-print">
-            Total Records: <strong>{reportData.length}</strong>
+            Total Records: {reportData.length}
           </p>
         </div>
       )}
 
       {fetched && reportData.length === 0 && !loading && (
-        <p className="der-no-data no-print">No records found for the given criteria.</p>
+        <p className="der-error no-print">No records found for the given criteria.</p>
       )}
     </div>
   );

@@ -31,9 +31,6 @@ const glReportController = require('../controllers/glReportController');
  *       500:
  *         description: Server error
  */
-// Endpoint to get product name by code
-router.get('/product-name', glReportController.getProductNameByCode);
-
 // Endpoint for the print button
 router.get('/print', glReportController.getGlReportForPrint);
 

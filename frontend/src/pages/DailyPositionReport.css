@@ -26,9 +26,3 @@
   border-bottom: 1px solid #e5e7eb;
   background: #fafafa;
 }
-
-/* ── Force left-align on all table cells ── */
-.dpr-result-wrapper .db-table th,
-.dpr-result-wrapper .db-table td {
-  text-align: left !important;
-}

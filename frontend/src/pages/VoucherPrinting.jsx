@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./VoucherPrinting.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cbsapi.avsinsotech.com:8596";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const parseDate = (raw) => {
   const parts = raw.trim().split("/");

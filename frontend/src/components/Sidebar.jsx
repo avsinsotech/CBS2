@@ -933,6 +933,7 @@ const subItemIconMap = {
   "Balance sheet":              "ti-building-bank",
   "Branchwise GL Report":       "ti-git-branch",
   "Recipt Payment Report":      "ti-file-invoice",
+  "ABR ALR Report":              "ti-file-invoice",
   "Receipt & Payment With Bal": "ti-coins",
   "Branch Adjustment":          "ti-adjustments-horizontal",
   // Daily
@@ -977,6 +978,7 @@ const subRouteMap = {
   "General_Ledger__Balance sheet":              "/reports/general-ledger/balance-sheet",
   "General_Ledger__Branchwise GL Report":       "/reports/general-ledger/branchwise-gl-report",
   "General_Ledger__Recipt Payment Report":      "/reports/general-ledger/receipt-payment-report",
+ "General_Ledger__ABR ALR Report": "/reports/general-ledger/abr-alr-report",
   "General_Ledger__Receipt & Payment With Bal": "/reports/general-ledger/receipt-payment-with-bal",
   "General_Ledger__Branch Adjustment":          "/reports/general-ledger/branch-adjustment",
   // Daily
@@ -1008,17 +1010,6 @@ const subRouteMap = {
   "Monthly__TDS Report":              "tds-report",
   "Monthly__CRR / SLR Report":        "crr-slr-report",
   "Monthly__CRARReport":              "crar-report",
-
-  // Restored Monthly reporting routes
-  "Monthly_Reporting__Chairman Report": "chairman-report",
-  "Monthly_Reporting__loan Against FD": "loan-against-fd",
-  "Monthly_Reporting__Gold Loan Sanction": "gold-loan-sanction",
-  "Monthly_Reporting__All Ok Report": "all-ok-report",
-  "Monthly_Reporting__Deposit & Loan Statement": "deposit-loan-statement",
-  "Monthly_Reporting__Loan Summary": "loan-summary",
-  "Monthly_Reporting__Loan Defaulter List": "loan-defaulter-list",
-  "Monthly_Reporting__Rate Wise-Deposit & Loan": "rate-wise-deposit-loan",
-  "Monthly_Reporting__Trial Balance": "trial-balance",
 };
 
 // ── Menu data ─────────────────────────────────────────────────────────────────
@@ -1135,25 +1126,13 @@ const menuItems = [
           "Balance sheet",
           "Branchwise GL Report",
           "Recipt Payment Report",
+          "ABR ALR Report",
           "Receipt & Payment With Bal",
           "Branch Adjustment",
         ]
       },
       { label: "Saving",               children: [] },
-      {
-        label: "Monthly_Reporting",
-        children: [
-          "Chairman Report",
-          "loan Against FD",
-          "Gold Loan Sanction",
-          "All Ok Report",
-          "Deposit & Loan Statement",
-          "Loan Summary",
-          "Loan Defaulter List",
-          "Rate Wise-Deposit & Loan",
-          "Trial Balance",
-        ]
-      },
+      { label: "Monthly_Reporting",    children: [] },
       { label: "Certificate",          children: [] },
       { label: "GOI Security",         children: [] },
     ]

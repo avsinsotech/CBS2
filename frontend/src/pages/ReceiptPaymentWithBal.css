@@ -407,33 +407,36 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Total row */
-.rpb-fmt-total-row {
-  background: #f0f0f0 !important;
-}
-
-.rpb-fmt-total-row:hover {
-  background: #f0f0f0 !important;
+/* ─── totals row ──────────────────────────────────────── */
+.rpb-fmt-totals-row td {
+  border-top: 2px solid #333 !important;
+  font-weight: 700;
+  background: #f0f4f8;
+  padding: 4px 6px;
 }
 
 .rpb-fmt-total-label {
+  text-align: right !important;
   font-weight: 700;
-  font-size: 11px;
-  color: #000;
-  text-align: right;
-  padding: 5px 6px !important;
+  color: #111;
+  white-space: nowrap;
 }
 
 .rpb-fmt-total-val {
-  font-weight: 700;
-  font-size: 11px;
-  color: #000;
-  padding: 5px 6px !important;
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ─── print styles ────────────────────────────────────── */
 @media print {
   .navbar, .sidebar { display: none !important; }
+
+  @page { size: landscape; margin: 8mm; }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 
   .rpb-wrapper {
     padding: 0;
@@ -473,4 +476,9 @@
   }
 
   .rpb-fmt-meta-row { font-size: 9px; }
+
+  .rpb-fmt-totals-row td {
+    font-size: 8px;
+    padding: 2px 5px;
+  }
 }
