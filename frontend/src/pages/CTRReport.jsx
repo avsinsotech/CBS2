@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./CTRReport.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cbsapi.avsinsotech.com:8596";
 
@@ -10,6 +11,70 @@ function toISO(raw) {
   if (y.length === 2) y = "20" + y;
   return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 }
+
+const CTR_COLUMNS = [
+  { key: "srNo", label: "SrNo", width: "3%" },
+  { key: "brcd", label: "Brcd", width: "4%" },
+  { key: "prdCode", label: "Prd Code", width: "6%" },
+  { key: "accNo", label: "AccNo", width: "6%" },
+  { key: "custNo", label: "CustNo", width: "6%" },
+  { key: "custName", label: "Cust Name", width: "22%" },
+  { key: "entryDate", label: "Entry Date", width: "8%" },
+  { key: "setNo", label: "SetNo", width: "4%" },
+  { key: "amount", label: "Amount", width: "8%", align: "right" },
+  { key: "totalAmount", label: "Total Amount", width: "8%", align: "right" },
+  { key: "typeOfPayment", label: "Type Of Payment", width: "8%" },
+  { key: "customerType", label: "CustomerType", width: "8%" },
+  { key: "oldCategory", label: "Old Category", width: "6%" },
+  { key: "category", label: "Category", width: "6%" },
+  { key: "limit", label: "Limit", width: "5%" }
+];
+
+const getValueInsensitive = (obj, key) => {
+  if (!obj) return "";
+  const keys = Object.keys(obj);
+  const foundKey = keys.find(k => k.toLowerCase() === key.toLowerCase());
+  return foundKey ? obj[foundKey] : "";
+};
+
+const mapRowToStandard = (row, index) => {
+  const getVal = (key) => getValueInsensitive(row, key);
+
+  let entryDate = getVal("entrydate") || getVal("ENTRYDATE") || "";
+  if (entryDate && String(entryDate).includes("T")) {
+    const d = new Date(entryDate);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      entryDate = `${day}/${month}/${year}`;
+    }
+  }
+
+  const formatAmt = (val) => {
+    if (val === undefined || val === null || val === "") return "";
+    const num = parseFloat(val);
+    return isNaN(num) ? String(val) : num.toFixed(2);
+  };
+
+  return {
+    srNo: index + 1,
+    brcd: getVal("brcd") || getVal("BRCD") || "",
+    prdCode: getVal("subglcode") || getVal("SUBGLCODE") || getVal("glcode") || getVal("GLCODE") || "",
+    accNo: getVal("accno") || getVal("ACCNO") || "",
+    custNo: getVal("custno") || getVal("CUSTNO") || "",
+    custName: getVal("custname") || getVal("CUSTNAME") || "",
+    entryDate: entryDate,
+    setNo: getVal("setno") || getVal("SETNO") || "",
+    amount: formatAmt(getVal("amount") || getVal("AMOUNT")),
+    totalAmount: formatAmt(getVal("totalwithdraw") || getVal("TOTALWITHDRAW") || getVal("totalamount") || getVal("TOTALAMOUNT") || getVal("crbal") || getVal("CRBAL") || getVal("drbal") || getVal("DRBAL")),
+    typeOfPayment: getVal("trxtype") || getVal("TRXTYPE") || getVal("Type") || getVal("typeofpayment") || "",
+    customerType: getVal("custtype") || getVal("CustType") || getVal("customertype") || getVal("CustomerType") || "",
+    oldCategory: getVal("oldcategory") || getVal("OldCategory") || getVal("custcategory") || getVal("CUSTCATEGORY") || "",
+    category: getVal("category") || getVal("Category") || "",
+    limit: getVal("limit") || getVal("Limit") || ""
+  };
+};
 
 export default function CTRReport() {
   const [fromBrcd, setFromBrcd] = useState("1");
@@ -23,7 +88,6 @@ export default function CTRReport() {
   const [toDate, setToDate] = useState("30/03/2026");
 
   const [reportData, setReportData] = useState([]);
-  const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fetched, setFetched] = useState(false);
@@ -40,7 +104,6 @@ export default function CTRReport() {
     setFromDate("01/04/2025");
     setToDate("30/03/2026");
     setReportData([]);
-    setColumns([]);
     setError("");
     setFetched(false);
     setActiveReport("");
@@ -76,7 +139,6 @@ export default function CTRReport() {
 
       const resData = await res.json();
       const data = resData.data || [];
-      setColumns(data.length > 0 ? Object.keys(data[0]) : []);
       setReportData(data);
       setFetched(true);
     } catch (err) {
@@ -114,7 +176,6 @@ export default function CTRReport() {
 
       const resData = await res.json();
       const data = resData.data || [];
-      setColumns(data.length > 0 ? Object.keys(data[0]) : []);
       setReportData(data);
       setFetched(true);
     } catch (err) {
@@ -154,7 +215,6 @@ export default function CTRReport() {
 
       const resData = await res.json();
       const data = resData.data || [];
-      setColumns(data.length > 0 ? Object.keys(data[0]) : []);
       setReportData(data);
       setFetched(true);
     } catch (err) {
@@ -164,12 +224,35 @@ export default function CTRReport() {
     }
   };
 
+  const standardRows = reportData.map((row, idx) => mapRowToStandard(row, idx));
+
+  // Determine if grouping is active for this dataset
+  const hasGrouping = standardRows.some(
+    (row) => row.customerType || row.category || row.oldCategory
+  );
+
+  // Group data by customerType and category
+  const groupedData = {};
+  if (hasGrouping) {
+    standardRows.forEach((row) => {
+      const custType = row.customerType || "Others";
+      const cat = row.category || row.oldCategory || "General";
+      if (!groupedData[custType]) {
+        groupedData[custType] = {};
+      }
+      if (!groupedData[custType][cat]) {
+        groupedData[custType][cat] = [];
+      }
+      groupedData[custType][cat].push(row);
+    });
+  }
+
   const handleDownloadCsv = () => {
-    if (!reportData || !reportData.length) return;
-    const headers = Object.keys(reportData[0]).join(',');
-    const rows = reportData.map(row =>
-      Object.values(row).map(val => {
-        let str = String(val ?? '');
+    if (!standardRows || !standardRows.length) return;
+    const headers = CTR_COLUMNS.map(col => col.label).join(',');
+    const rows = standardRows.map(row =>
+      CTR_COLUMNS.map(col => {
+        let str = String(row[col.key] ?? '');
         str = str.replace(/"/g, '""');
         if (str.includes(',') || str.includes('\n') || str.includes('"')) {
           str = `"${str}"`;
@@ -190,109 +273,194 @@ export default function CTRReport() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.cardHeader}>
-          <h2 style={styles.cardTitle}>CTR Report & Risk Update Menu</h2>
+    <div className="ctr-wrapper">
+      <div className="ctr-card no-print">
+        <div className="ctr-header">CTR Report &amp; Risk Update Menu</div>
+
+        <div className="ctr-form-section">
+          {/* From Brcd / To Brcd */}
+          <div className="ctr-row">
+            <label className="ctr-label">From Brcd <span style={{ color: "#ef4444" }}>*</span></label>
+            <input className="ctr-input" type="text" value={fromBrcd} onChange={(e) => setFromBrcd(e.target.value)} />
+            <label className="ctr-inline-label">To Brcd <span style={{ color: "#ef4444" }}>*</span></label>
+            <input className="ctr-input" type="text" value={toBrcd} onChange={(e) => setToBrcd(e.target.value)} />
+          </div>
+
+          {/* From Product Code */}
+          <div className="ctr-row">
+            <label className="ctr-label">From Product Code <span style={{ color: "#ef4444" }}>*</span></label>
+            <input className="ctr-input" type="text" value={fromProductCode} onChange={(e) => setFromProductCode(e.target.value)} />
+            <input className="ctr-input" style={{ marginLeft: 8, width: 320 }} type="text" placeholder="From Product Name" value={fromProductDesc} onChange={(e) => setFromProductDesc(e.target.value)} />
+          </div>
+
+          {/* To Product Code */}
+          <div className="ctr-row">
+            <label className="ctr-label">To Product Code <span style={{ color: "#ef4444" }}>*</span></label>
+            <input className="ctr-input" type="text" value={toProductCode} onChange={(e) => setToProductCode(e.target.value)} />
+            <input className="ctr-input" style={{ marginLeft: 8, width: 320 }} type="text" placeholder="To Product Name" value={toProductDesc} onChange={(e) => setToProductDesc(e.target.value)} />
+          </div>
+
+          {/* Cash Limit */}
+          <div className="ctr-row">
+            <label className="ctr-label">Cash Limit <span style={{ color: "#ef4444" }}>*</span></label>
+            <input className="ctr-input" type="text" value={cashLimit} onChange={(e) => setCashLimit(e.target.value)} />
+          </div>
+
+          {/* From Date / To Date */}
+          <div className="ctr-row">
+            <label className="ctr-label">From Date <span style={{ color: "#ef4444" }}>*</span></label>
+            <input className="ctr-input" type="text" placeholder="DD/MM/YYYY" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+            <label className="ctr-inline-label">To Date <span style={{ color: "#ef4444" }}>*</span></label>
+            <input className="ctr-input" type="text" placeholder="DD/MM/YYYY" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+          </div>
         </div>
 
-        <div style={styles.cardBody}>
-          <div style={styles.innerBox}>
-            {/* From Brcd / To Brcd */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>From Brcd <span style={styles.req}>*</span></label>
-              <input style={styles.input} type="text" value={fromBrcd} onChange={(e) => setFromBrcd(e.target.value)} />
-              <label style={{ ...styles.label, marginLeft: 40 }}>To Brcd <span style={styles.req}>*</span></label>
-              <input style={styles.input} type="text" value={toBrcd} onChange={(e) => setToBrcd(e.target.value)} />
-            </div>
+        {error && <p className="ctr-error" style={{ margin: "0 20px 10px 20px" }}>⚠️ {error}</p>}
 
-            {/* From Product Code */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>From Product Code <span style={styles.req}>*</span></label>
-              <input style={styles.input} type="text" value={fromProductCode} onChange={(e) => setFromProductCode(e.target.value)} />
-              <input style={{ ...styles.input, marginLeft: 8, width: 320 }} type="text" placeholder="From Product Name" value={fromProductDesc} onChange={(e) => setFromProductDesc(e.target.value)} />
-            </div>
-
-            {/* To Product Code */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>To Product Code <span style={styles.req}>*</span></label>
-              <input style={styles.input} type="text" value={toProductCode} onChange={(e) => setToProductCode(e.target.value)} />
-              <input style={{ ...styles.input, marginLeft: 8, width: 320 }} type="text" placeholder="To Product Name" value={toProductDesc} onChange={(e) => setToProductDesc(e.target.value)} />
-            </div>
-
-            {/* Cash Limit */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>Cash Limit <span style={styles.req}>*</span></label>
-              <input style={styles.input} type="text" value={cashLimit} onChange={(e) => setCashLimit(e.target.value)} />
-            </div>
-
-            {/* From Date / To Date */}
-            <div style={styles.formRow}>
-              <label style={styles.label}>From Date <span style={styles.req}>*</span></label>
-              <input style={styles.input} type="text" placeholder="DD/MM/YYYY" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
-              <label style={{ ...styles.label, marginLeft: 40 }}>To Date <span style={styles.req}>*</span></label>
-              <input style={styles.input} type="text" placeholder="DD/MM/YYYY" value={toDate} onChange={(e) => setToDate(e.target.value)} />
-            </div>
+        {loading && (
+          <div className="ctr-loading-bar" style={{ margin: "0 20px 10px 20px", width: "calc(100% - 40px)" }}>
+            <div className="ctr-loading-fill" />
           </div>
+        )}
 
-          {error && <p style={styles.errorText}>⚠️ {error}</p>}
+        {/* Buttons Row 1 */}
+        <div className="ctr-btn-row">
+          <button className="ctr-btn ctr-btn-blue" onClick={() => executeGeneralReport("CREDIT")} disabled={loading}>CTR Credit Report</button>
+          <button className="ctr-btn ctr-btn-blue" onClick={() => executeGeneralReport("DEBIT")} disabled={loading}>CTR Debit Report</button>
+          <button className="ctr-btn ctr-btn-blue" onClick={executeLimitReport} disabled={loading}>CTR Limit Report</button>
+          <button className="ctr-btn ctr-btn-secondary" onClick={handleClear} disabled={loading}>Clear</button>
+        </div>
 
-          {loading && (
-            <div style={styles.loadingBar}>
-              <div style={styles.loadingFill} />
-            </div>
+        {/* Buttons Row 2 */}
+        <div className="ctr-btn-row" style={{ marginTop: -8 }}>
+          <button className="ctr-btn ctr-btn-orange" onClick={() => executeRiskCategoryUpdate("D", "Transaction Risk Category")} disabled={loading}>Transaction Risk Category</button>
+          <button className="ctr-btn ctr-btn-orange" onClick={() => executeRiskCategoryUpdate("S", "Risk Category Summary")} disabled={loading}>Risk Category Summary</button>
+          <button className="ctr-btn ctr-btn-orange" onClick={() => executeRiskCategoryUpdate("KYCSUMMARY", "Summary match With KYC")} disabled={loading}>Summary match With KYC</button>
+          <button className="ctr-btn ctr-btn-orange" onClick={() => executeRiskCategoryUpdate("UPDATE", "Risk Category Update")} disabled={loading}>Risk Category Update</button>
+          {reportData.length > 0 && (
+            <button className="ctr-btn ctr-btn-excel" onClick={handleDownloadCsv}>Export CSV</button>
           )}
-
-          {/* Buttons Row 1 */}
-          <div style={styles.btnRow}>
-            <button style={styles.btnPrimary} onClick={() => executeGeneralReport("CREDIT")} disabled={loading}>CTR Credit Report</button>
-            <button style={styles.btnPrimary} onClick={() => executeGeneralReport("DEBIT")} disabled={loading}>CTR Debit Report</button>
-            <button style={styles.btnPrimary} onClick={executeLimitReport} disabled={loading}>CTR Limit Report</button>
-            <button style={styles.btnSecondary} onClick={handleClear} disabled={loading}>Clear</button>
-          </div>
-
-          {/* Buttons Row 2 */}
-          <div style={{ ...styles.btnRow, marginTop: 10 }}>
-            <button style={styles.btnOrange} onClick={() => executeRiskCategoryUpdate("D", "Transaction Risk Category")} disabled={loading}>Transaction Risk Category</button>
-            <button style={styles.btnOrange} onClick={() => executeRiskCategoryUpdate("S", "Risk Category Summary")} disabled={loading}>Risk Category Summary</button>
-            <button style={styles.btnOrange} onClick={() => executeRiskCategoryUpdate("KYCSUMMARY", "Summary match With KYC")} disabled={loading}>Summary match With KYC</button>
-            <button style={styles.btnOrange} onClick={() => executeRiskCategoryUpdate("UPDATE", "Risk Category Update")} disabled={loading}>Risk Category Update</button>
-            {reportData.length > 0 && (
-              <button style={styles.btnExcel} onClick={handleDownloadCsv}>Export CSV</button>
-            )}
-          </div>
         </div>
       </div>
 
-      {/* Results Section */}
+      {/* Results Section / Preview Layout */}
       {fetched && reportData.length > 0 && (
-        <div style={styles.tableWrapper}>
-          <div style={styles.tableHeader}>
-            <span style={{ fontWeight: 600, fontSize: 13, color: "#1e293b" }}>
-              {activeReport} — {reportData.length} records found
-            </span>
+        <>
+          {/* Preview Toolbar */}
+          <div className="ctr-preview-toolbar no-print">
+            <span className="ctr-preview-title">{activeReport} — Preview</span>
+            <button className="ctr-btn-print" onClick={() => window.print()}>
+              🖨️ Print
+            </button>
           </div>
-          <div style={{ overflowX: "auto", maxHeight: "400px" }}>
-            <table style={styles.table}>
-              <thead>
-                <tr style={styles.thRow}>
-                  {columns.map((col) => (
-                    <th key={col} style={styles.th}>{col}</th>
+
+          {/* Formatted Report Document */}
+          <div className="ctr-formatted-report">
+            {/* Org Header */}
+            <div className="ctr-fmt-org-name">
+              SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI
+            </div>
+
+            {/* Meta Grid */}
+            <div className="ctr-fmt-meta-grid">
+              <div className="ctr-fmt-meta-left">
+                <div className="ctr-fmt-meta-row">
+                  <span className="ctr-fmt-meta-key">Name</span>
+                  <span className="ctr-fmt-meta-sep">:</span>
+                  <span className="ctr-fmt-meta-val">SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI</span>
+                </div>
+                <div className="ctr-fmt-meta-row">
+                  <span className="ctr-fmt-meta-key">Branch Name</span>
+                  <span className="ctr-fmt-meta-sep">:</span>
+                  <span className="ctr-fmt-meta-val">{fromBrcd === "1" ? "HEAD OFFICE" : `BRANCH ${fromBrcd}`}</span>
+                </div>
+              </div>
+              <div className="ctr-fmt-meta-right">
+                <div className="ctr-fmt-meta-row">
+                  <span className="ctr-fmt-meta-key">Print Date</span>
+                  <span className="ctr-fmt-meta-sep">:</span>
+                  <span className="ctr-fmt-meta-val">
+                    {new Date().toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  </span>
+                </div>
+                <div className="ctr-fmt-meta-row">
+                  <span className="ctr-fmt-meta-key">User ID</span>
+                  <span className="ctr-fmt-meta-sep">:</span>
+                  <span className="ctr-fmt-meta-val">Rohini</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="ctr-fmt-divider" />
+
+            {/* Render tables based on grouping presence */}
+            {hasGrouping ? (
+              Object.entries(groupedData).map(([custType, categories]) => (
+                <div key={custType} className="ctr-group-section">
+                  <h3 className="ctr-group-header-1">{custType}</h3>
+                  {Object.entries(categories).map(([category, rows]) => (
+                    <div key={category} className="ctr-subgroup-section">
+                      <h4 className="ctr-group-header-2">{category}</h4>
+                      <table className="ctr-fmt-table">
+                        <thead>
+                          <tr>
+                            {CTR_COLUMNS.map((col) => (
+                              <th key={col.key} className="ctr-fmt-th" style={{ width: col.width }}>
+                                {col.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map((row) => (
+                            <tr key={row.srNo}>
+                              {CTR_COLUMNS.map((col) => (
+                                <td
+                                  key={col.key}
+                                  className="ctr-fmt-td"
+                                  style={{ textAlign: col.align || "left" }}
+                                >
+                                  {row[col.key]}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {reportData.map((row, i) => (
-                  <tr key={i} style={i % 2 === 0 ? styles.trEven : styles.trOdd}>
-                    {columns.map((col) => (
-                      <td key={col} style={styles.td}>{String(row[col] ?? "-")}</td>
+                </div>
+              ))
+            ) : (
+              <table className="ctr-fmt-table">
+                <thead>
+                  <tr>
+                    {CTR_COLUMNS.map((col) => (
+                      <th key={col.key} className="ctr-fmt-th" style={{ width: col.width }}>
+                        {col.label}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {standardRows.map((row) => (
+                    <tr key={row.srNo}>
+                      {CTR_COLUMNS.map((col) => (
+                        <td
+                          key={col.key}
+                          className="ctr-fmt-td"
+                          style={{ textAlign: col.align || "left" }}
+                        >
+                          {row[col.key]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
-        </div>
+        </>
       )}
 
       {fetched && reportData.length === 0 && (
@@ -303,32 +471,3 @@ export default function CTRReport() {
     </div>
   );
 }
-
-const styles = {
-  container: { display: "flex", flexDirection: "column", gap: 20, width: "100%" },
-  card: { background: "white", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", fontFamily: "'Poppins', sans-serif" },
-  cardHeader: { background: "linear-gradient(90deg, #334155, #334155)", padding: "12px 20px" },
-  cardTitle: { color: "white", margin: 0, fontSize: 16, fontWeight: 600 },
-  cardBody: { padding: "24px 20px" },
-  innerBox: { border: "1px solid #bfdbfe", borderRadius: 8, padding: "18px 20px", marginBottom: 20, background: "#fff" },
-  formRow: { display: "flex", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 6 },
-  label: { fontSize: 12, fontWeight: 500, color: "#374151", flexShrink: 0, marginRight: 8, minWidth: 130, textAlign: "right" },
-  req: { color: "#ef4444" },
-  input: { height: 32, border: "1px solid #d1d5db", borderRadius: 6, padding: "0 10px", fontSize: 12, color: "#1e293b", outline: "none", width: 200, fontFamily: "'Poppins', sans-serif", boxSizing: "border-box" },
-  btnRow: { display: "flex", flexWrap: "wrap", gap: 8 },
-  btnPrimary: { height: 32, padding: "0 16px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none", color: "white", background: "#334155", fontFamily: "'Poppins', sans-serif" },
-  btnOrange: { height: 32, padding: "0 16px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "none", color: "white", background: "#f97316", fontFamily: "'Poppins', sans-serif" },
-  btnSecondary: { height: 32, padding: "0 16px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", background: "#f1f5f9", border: "1px solid #cbd5e1", color: "#334155", fontFamily: "'Poppins', sans-serif" },
-  btnExcel: { height: 32, padding: "0 16px", borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: "pointer", background: "linear-gradient(90deg, #10b981, #059669)", border: "none", color: "white", fontFamily: "'Poppins', sans-serif" },
-  errorText: { color: "#ef4444", fontSize: 12, margin: "10px 0", fontWeight: 500 },
-  loadingBar: { width: "100%", height: 4, backgroundColor: "#e2e8f0", borderRadius: 2, overflow: "hidden", marginBottom: 16 },
-  loadingFill: { width: "50%", height: "100%", backgroundColor: "#3b82f6" },
-  tableWrapper: { background: "white", borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", padding: 20, fontFamily: "'Poppins', sans-serif" },
-  tableHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid #e2e8f0", paddingBottom: 10 },
-  table: { width: "100%", borderCollapse: "collapse", fontSize: 12, textAlign: "left" },
-  thRow: { backgroundColor: "#f8fafc", borderBottom: "2px solid #e2e8f0" },
-  th: { padding: "10px 12px", fontWeight: 600, color: "#475569" },
-  td: { padding: "10px 12px", color: "#334155", borderBottom: "1px solid #f1f5f9" },
-  trEven: { backgroundColor: "#ffffff" },
-  trOdd: { backgroundColor: "#f8fafc" },
-};
