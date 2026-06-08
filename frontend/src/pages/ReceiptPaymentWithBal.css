@@ -1,0 +1,452 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* ─── wrapper ─────────────────────────────────────────── */
+.rpb-wrapper {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 74px);
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ─── card ────────────────────────────────────────────── */
+.rpb-card {
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* ─── header ──────────────────────────────────────────── */
+.rpb-header {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 18px;
+  letter-spacing: 0.4px;
+}
+
+/* ─── form section ────────────────────────────────────── */
+.rpb-form-section {
+  border: 1px solid #c8d8f0;
+  border-radius: 4px;
+  margin: 16px 16px 8px 16px;
+  padding: 20px 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── rows ────────────────────────────────────────────── */
+.rpb-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.rpb-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+.rpb-inline-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  margin-left: 32px;
+}
+
+.req { color: #ef4444; }
+
+/* ─── radio group ─────────────────────────────────────── */
+.rpb-radio-group {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.rpb-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rpb-radio-label input[type="radio"] {
+  accent-color: #273449;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* ─── inputs ──────────────────────────────────────────── */
+.rpb-input {
+  height: 34px;
+  width: 200px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.rpb-input:focus {
+  border-color: #4f7cff;
+  box-shadow: 0 0 0 3px rgba(79,124,255,0.12);
+}
+
+.rpb-input::placeholder { color: #9ca3af; }
+
+.rpb-input-shaded {
+  background: #fefce8;
+  border-color: #86efac;
+}
+
+/* ─── error ───────────────────────────────────────────── */
+.rpb-error {
+  font-size: 12.5px;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+/* ─── loading bar ─────────────────────────────────────── */
+.rpb-loading-bar {
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.rpb-loading-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  border-radius: 2px;
+  animation: rpb-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes rpb-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* ─── footer ──────────────────────────────────────────── */
+.rpb-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8f9fb;
+}
+
+/* ─── buttons ─────────────────────────────────────────── */
+.rpb-btn {
+  height: 36px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 4px;
+  background: #273449;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.rpb-btn:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.rpb-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.rpb-btn-print { background: #374151; }
+
+.rpb-btn-sm {
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+/* ─── preview panel ───────────────────────────────────── */
+.rpb-preview {
+  margin: 0 16px 16px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  min-height: 300px;
+  background: #f8f9fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rpb-preview-empty {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* ─── report wrapper (inside preview) ─────────────────── */
+.rpb-report-wrapper {
+  width: 100%;
+  padding: 12px;
+  align-self: flex-start;
+}
+
+.rpb-report-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px 10px 4px;
+}
+
+/* ─── grid table wrapper ──────────────────────────────── */
+.rpb-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding: 16px;
+}
+
+/* ─── grid table ──────────────────────────────────────── */
+.rpb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.rpb-table thead {
+  background: #273449;
+  color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.rpb-table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.12);
+}
+
+.rpb-table thead th:last-child { border-right: none; }
+
+.rpb-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.12s;
+}
+
+.rpb-table tbody tr:nth-child(even) { background: #f9fafb; }
+.rpb-table tbody tr:hover           { background: #eff6ff; }
+
+.rpb-table tbody td {
+  padding: 9px 14px;
+  color: #374151;
+  white-space: nowrap;
+  border-right: 1px solid #f3f4f6;
+}
+
+.rpb-table tbody td:last-child { border-right: none; }
+
+/* ─── record count ────────────────────────────────────── */
+.rpb-record-count {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 8px 0 0 0;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORMATTED REPORT STYLES  (matches the picture)
+   ═══════════════════════════════════════════════════════ */
+
+.rpb-formatted-report {
+  background: #ffffff;
+  padding: 16px 20px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+}
+
+/* Meta header */
+.rpb-fmt-meta-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.rpb-fmt-meta-left,
+.rpb-fmt-meta-right {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rpb-fmt-meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  color: #222;
+  font-family: 'Poppins', sans-serif;
+}
+
+.rpb-fmt-meta-key {
+  font-weight: 600;
+  min-width: 100px;
+}
+
+.rpb-fmt-meta-sep { font-weight: 600; }
+.rpb-fmt-meta-val { color: #111; }
+
+/* Table */
+.rpb-fmt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+  font-family: 'Poppins', sans-serif;
+  table-layout: fixed;
+}
+
+/* Title row */
+.rpb-fmt-title-row {
+  text-align: center;
+  font-weight: 700;
+  font-size: 12.5px;
+  color: #000;
+  padding: 8px 10px;
+  border: 1px solid #aaa;
+  background: #ffffff;
+}
+
+/* Section header rows */
+.rpb-fmt-section-head {
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid #aaa;
+}
+
+.rpb-fmt-section-receipt {
+  color: #c00000;
+  background: #f8f8f8;
+}
+
+.rpb-fmt-section-payment {
+  color: #c00000;
+  background: #f8f8f8;
+}
+
+/* Column header row */
+.rpb-fmt-col-head-row th {
+  background: #ffffff;
+  font-weight: 700;
+  font-size: 10.5px;
+  color: #111;
+  padding: 5px 6px;
+  border: 1px solid #aaa;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Data cells */
+.rpb-fmt-td {
+  padding: 2px 4px;
+  border: 1px solid #ccc;
+  color: #222;
+  vertical-align: top;
+}
+
+.rpb-fmt-row-alt {
+  background: #f9f9f9;
+}
+
+.rpb-fmt-table tbody tr:hover {
+  background: #eef4fb;
+}
+
+/* Column widths */
+.rpb-fmt-col-srno   { width: 2%;  text-align: center; white-space: nowrap; }
+.rpb-fmt-col-glname { width: 14%; }
+.rpb-fmt-col-amt    { width: 6%;  text-align: right; white-space: nowrap; }
+.rpb-fmt-col-bal    { width: 6%;  text-align: right; white-space: nowrap; }
+.rpb-fmt-col-drcr   { width: 2%;  text-align: center; white-space: nowrap; }
+
+/* Right-align numbers */
+.rpb-fmt-num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── print styles ────────────────────────────────────── */
+@media print {
+  .navbar, .sidebar { display: none !important; }
+
+  .rpb-wrapper {
+    padding: 0;
+    background: #fff;
+    min-height: unset;
+  }
+
+  .rpb-card { border: none; box-shadow: none; }
+
+  .rpb-form-section,
+  .rpb-footer,
+  .rpb-report-toolbar,
+  .rpb-record-count {
+    display: none !important;
+  }
+
+  .rpb-preview {
+    border: none;
+    background: #ffffff;
+    min-height: unset;
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .rpb-report-wrapper { padding: 0; }
+
+  .rpb-formatted-report {
+    border: none;
+    padding: 0;
+  }
+
+  .rpb-fmt-table th,
+  .rpb-fmt-table td {
+    font-size: 8px;
+    padding: 2px 5px;
+  }
+
+  .rpb-fmt-meta-row { font-size: 9px; }
+}

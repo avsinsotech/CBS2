@@ -1,0 +1,303 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* ── Wrapper ── */
+.ba-wrapper {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 74px);
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ── Card ── */
+.ba-card {
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  max-width: 1500px;
+}
+
+/* ── Header ── */
+.ba-header {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 18px;
+  letter-spacing: 0.4px;
+}
+
+/* ── Body ── */
+.ba-body {
+  padding: 20px 20px 8px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Row ── */
+.ba-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+/* ── Field ── */
+.ba-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ba-field-wide input {
+  width: 340px;
+}
+
+.ba-field label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.req {
+  color: #ef4444;
+}
+
+/* ── Inputs ── */
+.ba-field input {
+  height: 34px;
+  width: 200px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ba-field input:focus {
+  border-color: #273449;
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.12);
+}
+
+.ba-field input::placeholder {
+  color: #9ca3af;
+}
+
+/* ── Error / Loading ── */
+.ba-error {
+  color: #dc2626;
+  font-size: 12.5px;
+  margin: 4px 0 0;
+}
+
+.ba-loading {
+  color: #2563eb;
+  font-size: 12.5px;
+  margin: 4px 0 0;
+}
+
+/* ── Footer / Buttons ── */
+.ba-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8f9fb;
+  margin: 8px -20px -8px;
+}
+
+.ba-btn {
+  height: 36px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.ba-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ba-btn-print {
+  background: #273449;
+  color: #ffffff;
+}
+
+.ba-btn-view {
+  background: #273449;
+  color: #ffffff;
+}
+
+.ba-btn:not(:disabled):hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+/* ── Table ── */
+.ba-table-wrapper {
+  margin-top: 20px;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ba-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.ba-table thead {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+}
+
+.ba-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.ba-table tbody tr:nth-child(even) {
+  background: #f8fafd;
+}
+
+.ba-table tbody tr:hover {
+  background: #eef3fb;
+}
+
+.ba-table td {
+  padding: 8px 14px;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+/* ── Record count ── */
+.ba-record-count {
+  font-size: 12px;
+  color: #6b7280;
+  padding: 8px 14px;
+  text-align: right;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ── Print styles ── */
+.ba-print-header {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 10mm 8mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .ba-wrapper {
+    padding: 0;
+    background: #ffffff;
+    min-height: unset;
+  }
+
+  .ba-print-header {
+    display: block;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .ba-print-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 3px;
+  }
+
+  .ba-print-header p {
+    font-size: 10px;
+    color: #374151;
+    margin: 0;
+  }
+
+  /* Remove scrollable container — fit full page width */
+  .ba-table-wrapper {
+    overflow: visible !important;
+    width: 100% !important;
+    border: none;
+    box-shadow: none;
+    margin-top: 0;
+  }
+
+  .ba-table {
+    width: 100% !important;
+    table-layout: auto;
+    border-collapse: collapse;
+    font-size: 8px;
+  }
+
+  .ba-table thead {
+    background: #273449 !important;
+    color: #ffffff !important;
+  }
+
+  .ba-table th {
+    padding: 5px 6px;
+    font-size: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid #aaaaaa;
+    background: #273449 !important;
+    color: #ffffff !important;
+  }
+
+  .ba-table td {
+    padding: 4px 6px;
+    font-size: 8px;
+    white-space: nowrap;
+    border: 1px solid #d1d5db;
+    color: #000000;
+  }
+
+  .ba-table tbody tr:nth-child(even) {
+    background: #f3f6fb !important;
+  }
+
+  .ba-record-count {
+    display: none;
+  }
+}

@@ -1,0 +1,7 @@
+/* Reuse all db-* styles from DailyDaybook.css */
+@import "./DailyDaybook.css";
+
+/* Wide input for text report name */
+.vp-input-wide {
+  width: 340px;
+}

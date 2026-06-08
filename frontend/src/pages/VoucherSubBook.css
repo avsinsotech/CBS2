@@ -1,0 +1,28 @@
+/* Reuse all db-* styles from DailyDaybook.css */
+@import "./DailyDaybook.css";
+
+/* Label inline (used for To Date on same row as From Date) */
+.db-label-inline {
+  min-width: 80px;
+  margin-left: 24px;
+}
+
+/* Select dropdown — matches db-input height and style */
+.db-select {
+  width: 200px;
+  height: 34px;
+  cursor: pointer;
+  background: #fffff0;
+  border-color: #a3c060;
+}
+
+.db-select:focus {
+  border-color: #273449;
+  box-shadow: 0 0 0 3px rgba(39, 52, 73, 0.12);
+  outline: none;
+}
+
+/* Wide input for text report name */
+.vsb-input-wide {
+  width: 340px;
+}

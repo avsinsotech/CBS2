@@ -1,0 +1,370 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+.pl-wrapper {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 74px);
+  font-family: 'Poppins', sans-serif;
+}
+
+.pl-card {
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.pl-header {
+  background: linear-gradient(90deg, #273449, #5b8dee);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 18px;
+  letter-spacing: 0.4px;
+}
+
+.pl-form-section {
+  border: 1px solid #c8d8f0;
+  border-radius: 4px;
+  margin: 16px;
+  padding: 20px 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ROW */
+.pl-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* LABELS */
+.pl-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 170px;
+  white-space: nowrap;
+}
+
+.pl-inline-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  margin-left: 24px;
+}
+
+/* INPUT */
+.pl-input {
+  height: 34px;
+  width: 200px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.pl-input:focus {
+  border-color: #4f7cff;
+  box-shadow: 0 0 0 3px rgba(79,124,255,0.12);
+}
+
+.pl-input::placeholder {
+  color: #9ca3af;
+}
+
+.pl-input-wide {
+  width: 300px;
+}
+
+/* RADIO ROW */
+.pl-radio-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.pl-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pl-radio-label input[type="radio"] {
+  accent-color: #273449;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* BUTTON ROW */
+.pl-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.pl-btn {
+  height: 36px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.pl-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.pl-btn-blue { background: #273449; }
+.pl-btn-red  { background: #273449; }
+
+.pl-btn-sm {
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+/* PREVIEW */
+.pl-preview {
+  margin: 0 16px 16px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  min-height: 300px;
+  background: #f8f9fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pl-preview-empty {
+  font-size: 13px;
+  color: #9ca3af;
+}
+/* ERROR */
+.pl-error {
+  font-size: 12.5px;
+  color: #dc2626;
+  margin: 0;
+  padding: 4px 0;
+}
+
+/* TABLE inside preview */
+.pl-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.pl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.pl-table th {
+  background: #273449;
+  color: #ffffff;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pl-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.pl-table tbody tr:nth-child(even) {
+  background: #f8f9fb;
+}
+
+.pl-table tbody tr:hover {
+  background: #eef2ff;
+}
+
+.pl-record-count {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 8px 0 0 0;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FORMATTED P&L REPORT STYLES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.pl-report-wrapper {
+  width: 100%;
+  padding: 12px;
+  align-self: flex-start;
+}
+
+.pl-report-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px 10px 4px;
+}
+
+.pl-report {
+  background: #ffffff;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Report Header */
+.pl-report-header {
+  padding: 10px 16px 6px 16px;
+  border-bottom: 2px solid #333;
+}
+
+.pl-report-header-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.pl-report-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  padding: 6px 0;
+}
+
+/* Report Table */
+.pl-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  font-family: 'Poppins', sans-serif;
+  table-layout: fixed;
+}
+
+.pl-report-table thead th {
+  background: #e0e0e0;
+  color: #b71c1c;
+  padding: 8px 10px;
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid #000;
+  text-align: left;
+}
+
+/* Column widths */
+.pl-rpt-col-desc { width: 32%; }
+.pl-rpt-col-bal  { width: 12%; text-align: right; }
+.pl-rpt-col-grp  { width: 6%; text-align: right; }
+
+.pl-report-table td {
+  padding: 3px 10px;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  vertical-align: top;
+  color: #333;
+}
+
+/* Head row (category) */
+.pl-rpt-head {
+  font-weight: 600;
+  color: #b71c1c;
+  font-style: italic;
+}
+
+/* Item row */
+.pl-rpt-item {
+  padding-left: 20px !important;
+  font-size: 11px;
+}
+
+.pl-rpt-code {
+  color: #333;
+  font-weight: 400;
+  margin-right: 6px;
+  font-size: 11px;
+}
+
+/* Balance columns */
+.pl-rpt-bal {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  color: #333;
+}
+
+.pl-rpt-grp-bal {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  color: #b71c1c;
+  font-weight: 600;
+}
+
+/* Profit color */
+.pl-rpt-profit {
+  color: #b71c1c !important;
+  font-style: italic;
+}
+
+/* Loss color */
+.pl-rpt-loss {
+  color: #b71c1c !important;
+  font-style: italic;
+}
+
+/* Grand total row */
+.pl-rpt-grand-total td {
+  border-top: 1px solid #000 !important;
+  border-bottom: 1px solid #000 !important;
+  font-weight: 700;
+  background: #fff;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+/* Tally row */
+.pl-rpt-tally td {
+  background: #add8e6;
+  text-align: left;
+  font-weight: 700;
+  color: #000;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-bottom: 1px solid #000;
+}
+
+/* Remove Zebra striping to match report */
+.pl-report-table tbody tr {
+  background: #fff;
+}
