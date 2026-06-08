@@ -167,7 +167,7 @@ export default function CTRReport() {
   const handleDownloadCsv = () => {
     if (!reportData || !reportData.length) return;
     const headers = Object.keys(reportData[0]).join(',');
-    const rows = reportData.map(row => 
+    const rows = reportData.map(row =>
       Object.values(row).map(val => {
         let str = String(val ?? '');
         str = str.replace(/"/g, '""');
