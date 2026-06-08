@@ -269,3 +269,137 @@
   padding: 24px 16px;
   font-style: italic;
 }
+
+/* ── LAZER REPORT VIEW ── */
+.tb-report-wrapper {
+  margin: 16px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.tb-report-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.tb-btn-sm {
+  height: 30px;
+  padding: 0 16px;
+  font-size: 12px;
+  background: #273449;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.tb-btn-sm:hover {
+  opacity: 0.9;
+}
+
+.tb-lazer-report {
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+  color: #000000;
+  font-size: 11px;
+  overflow-x: auto;
+}
+
+.tb-lazer-header {
+  border: 1.5px solid #000000;
+  margin-bottom: 12px;
+  padding: 8px 16px;
+  background: #ffffff;
+}
+
+.tb-lazer-header-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tb-lazer-header-row div {
+  line-height: 1.7;
+}
+
+.tb-lazer-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  margin-top: 8px;
+  border-top: 1.5px solid #000;
+  padding-top: 8px;
+}
+
+.tb-lazer-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1.5px solid #000000;
+  font-size: 11px;
+  background: #ffffff;
+}
+
+.tb-lazer-table th, .tb-lazer-table td {
+  border-left: 1.5px solid #000000;
+  border-right: 1.5px solid #000000;
+  padding: 4px 8px;
+}
+
+.tb-lazer-table td {
+  border-bottom: 1px dotted #cccccc;
+}
+
+.tb-lazer-table th {
+  background: #f1f5f9;
+  font-weight: 600;
+  border-top: 1.5px solid #000000;
+  border-bottom: 1.5px solid #000000;
+  text-align: left;
+  padding: 6px 8px;
+}
+
+.tb-lazer-table th.center-header {
+  text-align: center;
+}
+
+.tb-lazer-align-center {
+  text-align: center;
+}
+
+.tb-lazer-align-right {
+  text-align: right;
+}
+
+.tb-lazer-align-left {
+  text-align: left;
+}
+
+.tb-lazer-grp-header td {
+  font-weight: bold;
+  font-style: italic;
+  border-top: 1.5px dashed #000000;
+  border-bottom: 1.5px dashed #000000;
+  padding: 6px 8px;
+  background: #ffffff;
+}
+
+.tb-lazer-grp-total td {
+  border-top: 1.5px solid #000000;
+  border-bottom: 1.5px solid #000000;
+  font-weight: bold;
+  background: #ffffff;
+}
+
+.tb-lazer-grand-total td {
+  border-top: 1.5px solid #000000;
+  border-bottom: 1.5px double #000000;
+  font-weight: bold;
+  background: #ffffff;
+}

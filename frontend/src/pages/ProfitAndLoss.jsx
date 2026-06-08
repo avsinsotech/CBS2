@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import "./ProfitAndLoss.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
 
 // ── Per report-type config ────────────────────────────────────────────────────
 const REPORT_CONFIG = {
@@ -64,6 +64,11 @@ function PLReport({ data, branchCode, asOnDate }) {
   }
 
   const displayDate = asOnDate || new Date().toLocaleDateString("en-GB");
+
+  const bankName = data[0]?.BANKNAME || data[0]?.BankName || data[0]?.Bankname || "SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI";
+  const branchName = data[0]?.MIDNAME || data[0]?.MidName || data[0]?.Midname || "HEAD OFFICE";
+  const userId = "Rohini";
+  const printDate = new Date().toLocaleDateString("en-GB");
 
   let leftGroups = [];
   let rightGroups = [];
@@ -141,17 +146,33 @@ function PLReport({ data, branchCode, asOnDate }) {
   // 2. Build Visual Rows
   const leftVisualRows = [];
   leftGroups.forEach(grp => {
-    leftVisualRows.push({ isHeader: true, desc: grp.name, grpTotal: grp.total });
-    grp.items.forEach(item => {
-      leftVisualRows.push({ isHeader: false, code: item.code, desc: item.desc, bal: item.bal });
+    if (grp.name) {
+      leftVisualRows.push({ isHeader: true, desc: grp.name });
+    }
+    grp.items.forEach((item, idx) => {
+      leftVisualRows.push({
+        isHeader: false,
+        code: item.code,
+        desc: item.desc,
+        bal: item.bal,
+        grpTotal: idx === 0 ? grp.total : null
+      });
     });
   });
 
   const rightVisualRows = [];
   rightGroups.forEach(grp => {
-    rightVisualRows.push({ isHeader: true, desc: grp.name, grpTotal: grp.total });
-    grp.items.forEach(item => {
-      rightVisualRows.push({ isHeader: false, code: item.code, desc: item.desc, bal: item.bal });
+    if (grp.name) {
+      rightVisualRows.push({ isHeader: true, desc: grp.name });
+    }
+    grp.items.forEach((item, idx) => {
+      rightVisualRows.push({
+        isHeader: false,
+        code: item.code,
+        desc: item.desc,
+        bal: item.bal,
+        grpTotal: idx === 0 ? grp.total : null
+      });
     });
   });
 
@@ -162,11 +183,11 @@ function PLReport({ data, branchCode, asOnDate }) {
 
   if (plDiff > 0.01) {
     if (isProfit) {
-      leftVisualRows.push({ isHeader: true, desc: "Profit And Loss", grpTotal: plDiff, isProfit: true });
-      leftVisualRows.push({ isHeader: false, code: "99999", desc: "PROFIT", bal: plDiff, isProfit: true });
+      leftVisualRows.push({ isHeader: true, desc: "Profit And Loss", isProfit: true });
+      leftVisualRows.push({ isHeader: false, code: "99999", desc: "PROFIT", bal: plDiff, grpTotal: plDiff, isProfit: true });
     } else {
-      rightVisualRows.push({ isHeader: true, desc: "Profit And Loss", grpTotal: plDiff, isLoss: true });
-      rightVisualRows.push({ isHeader: false, code: "99999", desc: "LOSS", bal: plDiff, isLoss: true });
+      rightVisualRows.push({ isHeader: true, desc: "Profit And Loss", isLoss: true });
+      rightVisualRows.push({ isHeader: false, code: "99999", desc: "LOSS", bal: plDiff, grpTotal: plDiff, isLoss: true });
     }
   }
 
@@ -177,12 +198,12 @@ function PLReport({ data, branchCode, asOnDate }) {
       <div className="pl-report-header">
         <div className="pl-report-header-row">
           <div style={{ flex: 1 }}>
-            <div style={{ marginBottom: "5px" }}><b>Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> DEMO BANK</div>
-            <div><b>Branch Name :</b> HEAD OFFICE</div>
+            <div style={{ marginBottom: "5px" }}><b>Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> {bankName}</div>
+            <div><b>Branch Name :</b> {branchName}</div>
           </div>
           <div style={{ flex: 1, textAlign: "right" }}>
-            <div style={{ marginBottom: "5px" }}><b>Print Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> {new Date().toLocaleDateString("en-GB")}</div>
-            <div><b>Print By &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> AVS</div>
+            <div style={{ marginBottom: "5px" }}><b>Print Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> {printDate}</div>
+            <div><b>Print By &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> {userId}</div>
           </div>
         </div>
         <div className="pl-report-title">
@@ -191,12 +212,20 @@ function PLReport({ data, branchCode, asOnDate }) {
       </div>
 
       <table className="pl-report-table">
+        <colgroup>
+          <col className="pl-col-desc" />
+          <col className="pl-col-bal" />
+          <col className="pl-col-grp" />
+          <col className="pl-col-desc" />
+          <col className="pl-col-bal" />
+          <col className="pl-col-grp" />
+        </colgroup>
         <thead>
           <tr>
             <th className="pl-rpt-col-desc">Expenses Description</th>
-            <th className="pl-rpt-col-bal">Balance</th>
+            <th className="pl-rpt-col-bal" colSpan="2" style={{ textAlign: "center" }}>Balance</th>
             <th className="pl-rpt-col-desc">Income Description</th>
-            <th className="pl-rpt-col-bal">Balance</th>
+            <th className="pl-rpt-col-bal" colSpan="2" style={{ textAlign: "center" }}>Balance</th>
           </tr>
         </thead>
         <tbody>
@@ -209,8 +238,8 @@ function PLReport({ data, branchCode, asOnDate }) {
                 {L ? (
                   L.isHeader ? (
                     <>
-                      <td className={`pl-rpt-head ${L.isProfit ? 'pl-rpt-profit' : ''}`}><i>{L.desc}</i></td>
-                      <td className="pl-rpt-grp-bal">{fmt(L.grpTotal)}</td>
+                      <td className={`pl-rpt-head ${L.isProfit ? 'pl-rpt-profit' : ''}`} colSpan="2"><i>{L.desc}</i></td>
+                      <td className="pl-rpt-grp-bal"></td>
                     </>
                   ) : (
                     <>
@@ -219,17 +248,18 @@ function PLReport({ data, branchCode, asOnDate }) {
                         {L.desc ? L.desc.replace(L.code || "", "").trim() : ""}
                       </td>
                       <td className={`pl-rpt-bal ${L.isProfit ? 'pl-rpt-profit' : ''}`}>{fmt(L.bal)}</td>
+                      <td className={`pl-rpt-grp-bal ${L.isProfit ? 'pl-rpt-profit' : ''}`}>{L.grpTotal ? fmt(L.grpTotal) : ""}</td>
                     </>
                   )
                 ) : (
-                  <><td style={{ borderBottom: "none" }}></td><td style={{ borderBottom: "none" }}></td></>
+                  <><td style={{ borderBottom: "none" }}></td><td style={{ borderBottom: "none" }}></td><td style={{ borderBottom: "none" }}></td></>
                 )}
 
                 {R ? (
                   R.isHeader ? (
                     <>
-                      <td className={`pl-rpt-head ${R.isLoss ? 'pl-rpt-loss' : ''}`}><i>{R.desc}</i></td>
-                      <td className="pl-rpt-grp-bal">{fmt(R.grpTotal)}</td>
+                      <td className={`pl-rpt-head ${R.isLoss ? 'pl-rpt-loss' : ''}`} colSpan="2"><i>{R.desc}</i></td>
+                      <td className="pl-rpt-grp-bal"></td>
                     </>
                   ) : (
                     <>
@@ -238,10 +268,11 @@ function PLReport({ data, branchCode, asOnDate }) {
                         {R.desc ? R.desc.replace(R.code || "", "").trim() : ""}
                       </td>
                       <td className={`pl-rpt-bal ${R.isLoss ? 'pl-rpt-loss' : ''}`}>{fmt(R.bal)}</td>
+                      <td className={`pl-rpt-grp-bal ${R.isLoss ? 'pl-rpt-loss' : ''}`}>{R.grpTotal ? fmt(R.grpTotal) : ""}</td>
                     </>
                   )
                 ) : (
-                  <><td style={{ borderBottom: "none" }}></td><td style={{ borderBottom: "none" }}></td></>
+                  <><td style={{ borderBottom: "none" }}></td><td style={{ borderBottom: "none" }}></td><td style={{ borderBottom: "none" }}></td></>
                 )}
               </tr>
             );
@@ -249,12 +280,14 @@ function PLReport({ data, branchCode, asOnDate }) {
           
           <tr className="pl-rpt-grand-total">
             <td><b>Grand Total :</b></td>
-            <td className="pl-rpt-grp-bal"><b>{fmt(finalTotal)}</b></td>
+            <td></td>
+            <td className="pl-rpt-grp-bal" style={{ color: "#000" }}><b>{fmt(finalTotal)}</b></td>
             <td><b>Grand Total :</b></td>
-            <td className="pl-rpt-grp-bal"><b>{fmt(finalTotal)}</b></td>
+            <td></td>
+            <td className="pl-rpt-grp-bal" style={{ color: "#000" }}><b>{fmt(finalTotal)}</b></td>
           </tr>
           <tr className="pl-rpt-tally">
-            <td colSpan="4"><b>Profit & Loss Tally</b></td>
+            <td colSpan="6"><b>Profit & Loss Tally</b></td>
           </tr>
         </tbody>
       </table>
@@ -266,9 +299,9 @@ function ProfitAndLoss() {
   const [form, setForm] = useState({
     reportType: "As On Date",
     branchCode: "",
-    asOnDate: "",
-    fromDate: "",
-    toDate: "",
+    asOnDate: "2026-03-30",
+    fromDate: "2025-04-01",
+    toDate: "2026-03-30",
     textReportName: ""
   });
 
@@ -293,6 +326,8 @@ function ProfitAndLoss() {
 
   // Convert DD/MM/YYYY → YYYY-MM-DD
   const parseDate = (raw) => {
+    if (!raw) return null;
+    if (raw.includes("-")) return raw; // already ISO format
     const parts = raw.trim().split("/");
     if (parts.length !== 3) return null;
     let [d, m, y] = parts;
@@ -410,11 +445,14 @@ function ProfitAndLoss() {
         <head>
           <title>Profit & Loss Report</title>
           <style>
-            @page { margin: 10mm; }
+            @page { size: landscape; margin: 10mm; }
             body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 9px; margin: 0; }
             table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
             th, td { border-left: 1px solid #000; border-right: 1px solid #000; padding: 2px 4px; }
             th { background: #e0e0e0; font-weight: 600; border-top: 1px solid #000; border-bottom: 1px solid #000; color: #b71c1c; text-align: left; padding: 4px; }
+            col.pl-col-desc { width: 35%; }
+            col.pl-col-bal  { width: 8%; }
+            col.pl-col-grp  { width: 7%; }
             .pl-rpt-col-bal { text-align: right; }
             .pl-rpt-head { font-weight: 600; color: #b71c1c; font-style: italic; }
             .pl-rpt-item { padding-left: 10px; }
@@ -469,19 +507,16 @@ function ProfitAndLoss() {
           {isAsOnDate ? (
             <div className="pl-row">
               <label className="pl-label">As On Date</label>
-              <input className="pl-input" name="asOnDate"
-                placeholder="DD/MM/YYYY"
+              <input type="date" className="pl-input" name="asOnDate"
                 value={form.asOnDate} onChange={handleChange} />
             </div>
           ) : (
             <div className="pl-row">
               <label className="pl-label">From Date</label>
-              <input className="pl-input" name="fromDate"
-                placeholder="DD/MM/YYYY"
+              <input type="date" className="pl-input" name="fromDate"
                 value={form.fromDate} onChange={handleChange} />
               <label className="pl-inline-label">To Date</label>
-              <input className="pl-input" name="toDate"
-                placeholder="DD/MM/YYYY"
+              <input type="date" className="pl-input" name="toDate"
                 value={form.toDate} onChange={handleChange} />
             </div>
           )}

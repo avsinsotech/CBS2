@@ -56,5 +56,6 @@ const trialBalanceController = require('../controllers/trialBalanceController');
  *         description: Server error
  */
 router.get('/report', trialBalanceController.getTrialBalanceReport);
+router.get('/lazer', trialBalanceController.getTrialBalanceLazerReport);
 
 module.exports = router;

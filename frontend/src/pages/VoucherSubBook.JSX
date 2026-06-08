@@ -1,7 +1,8 @@
+
 import { useState } from "react";
 import "./VoucherSubBook.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cbsapi.avsinsotech.com:8596";
 
 const parseDate = (raw) => {
   const parts = raw.trim().split("/");
@@ -11,13 +12,13 @@ const parseDate = (raw) => {
   return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 };
 
+// Activity types mapped to SP Type parameter values
 const ACTIVITY_TYPES = [
-  "--Select--",
-  "Cash",
-  "Bank",
-  "Journal",
-  "Contra",
-  "Transfer",
+  { label: "--Select--", value: "--Select--" },
+  { label: "Receipt", value: "1" },
+  { label: "Payment", value: "2" },
+  { label: "Transfer", value: "3" },
+  { label: "All Activity", value: "4" },
 ];
 
 function VoucherSubBook() {
@@ -56,12 +57,10 @@ function VoucherSubBook() {
 
   const buildQuery = () =>
     new URLSearchParams({
-      reportType:     form.reportType.toLowerCase(),
-      branchCode:     form.branchCode,
-      fromDate:       form.fromDate,
-      toDate:         form.toDate,
-      activityType:   form.activityType,
-      textReportName: form.textReportName,
+      branchCode:    form.branchCode,
+      fromDate:      form.fromDate,
+      toDate:        form.toDate,
+      activityType:  form.activityType, // Sends '1', '2', '3', or '4'
     }).toString();
 
   const fetchData = async (mode) => {
@@ -141,6 +140,12 @@ function VoucherSubBook() {
     setFetched(false);
   };
 
+  // Get the label for the selected activity type
+  const getActivityTypeLabel = (value) => {
+    const activity = ACTIVITY_TYPES.find(a => a.value === value);
+    return activity ? activity.label : value;
+  };
+
   return (
     <div className="db-wrapper">
       <div className="db-card no-print">
@@ -215,7 +220,9 @@ function VoucherSubBook() {
               onChange={handleChange}
             >
               {ACTIVITY_TYPES.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
           </div>
@@ -273,7 +280,7 @@ function VoucherSubBook() {
               Branch: {form.branchCode} &nbsp;|&nbsp;
               From: {form.fromDate} &nbsp;|&nbsp;
               To: {form.toDate} &nbsp;|&nbsp;
-              Activity: {form.activityType} &nbsp;|&nbsp;
+              Activity: {getActivityTypeLabel(form.activityType)} &nbsp;|&nbsp;
               Printed: {new Date().toLocaleDateString()}
             </p>
           </div>

@@ -285,9 +285,11 @@
 }
 
 /* Column widths */
-.pl-rpt-col-desc { width: 32%; }
-.pl-rpt-col-bal  { width: 12%; text-align: right; }
-.pl-rpt-col-grp  { width: 6%; text-align: right; }
+col.pl-col-desc { width: 35%; }
+col.pl-col-bal  { width: 8%; }
+col.pl-col-grp  { width: 7%; }
+.pl-rpt-col-bal { text-align: right; }
+
 
 .pl-report-table td {
   padding: 3px 10px;
