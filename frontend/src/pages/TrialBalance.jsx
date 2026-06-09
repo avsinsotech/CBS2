@@ -19,6 +19,157 @@ function toISO(ddmmyyyy) {
   return `${parts[2]}-${parts[1]}-${parts[0]}`;
 }
 
+// ── Plain Text Generation ──────────────────────────────────────────────────
+const generateTextReport = (data, bankInfo, toDate, reportType) => {
+  if (!data || data.length === 0) return "No data available.";
+
+  const isSummary = reportType === "Summary Wise";
+  const displayDate = toDate ? toDate.split("-").reverse().join("/") : "";
+  const bankName = bankInfo.bankName || "SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI";
+  const branchName = bankInfo.branchName || "HEAD OFFICE";
+  const userId = bankInfo.printUserID || "Rohini";
+  const printDate = bankInfo.printDate || new Date().toLocaleDateString("en-GB");
+
+  const reportTitle = isSummary ? `Trial Balance Summary : ${displayDate}` : `Trial Balance Details : ${displayDate}`;
+
+  const groupsMap = {};
+  data.forEach((row) => {
+    const grpCode = (row.GLGROUP || "").trim();
+    const grpName = (row.GLGrp || "").trim();
+    const key = grpCode && grpName ? `${grpCode} - ${grpName}` : (grpCode || grpName || "Other");
+    if (!groupsMap[key]) groupsMap[key] = { code: grpCode, name: grpName, key, rows: [] };
+    groupsMap[key].rows.push(row);
+  });
+
+  const sortedGroupKeys = Object.keys(groupsMap).sort((a, b) => (groupsMap[a].code || "").localeCompare(groupsMap[b].code || ""));
+  sortedGroupKeys.forEach(key => {
+    groupsMap[key].rows.sort((a, b) => {
+      const numA = parseInt(a.SubGlCode, 10);
+      const numB = parseInt(b.SubGlCode, 10);
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return String(a.SubGlCode || "").localeCompare(String(b.SubGlCode || ""));
+    });
+  });
+
+  const P = (str, len, pad = ' ', r = false) => {
+    let s = String(str || "").substring(0, len);
+    return r ? s.padStart(len, pad) : s.padEnd(len, pad);
+  };
+
+  const fmtO = (v) => {
+    const n = parseFloat(v);
+    if (isNaN(n)) return "0.00";
+    return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  const fmtV = (v) => {
+    const n = parseFloat(v);
+    if (isNaN(n) || n === 0) return "0";
+    return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  const fmtT = (v) => {
+    const n = Math.round(parseFloat(v));
+    if (isNaN(n) || n === 0) return "0";
+    return n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+  };
+  const fmtC = (v) => {
+    const n = parseFloat(v);
+    if (isNaN(n)) return "0.00";
+    return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const wSr = 5;
+  const wCode = 9;
+  const wDesc = 40;
+  const wOpening = 15;
+  const wReceipt = 13;
+  const wPayment = 18;
+  const wCredit = 16;
+  const wDebit = 18;
+
+  const wTotalDetails = wSr + 1 + wCode + 1 + wDesc + 1 + wOpening + 1 + wReceipt + 1 + wPayment + 1 + wCredit + 1 + wDebit;
+  const wTotalSummary = wSr + 1 + wCode + 1 + wDesc + 1 + wCredit + 1 + wDebit;
+  const fullWidth = isSummary ? wTotalSummary : wTotalDetails;
+
+  const mhr = "|" + "-".repeat(fullWidth) + "|\n";
+
+  let text = " " + "-".repeat(fullWidth) + " \n";
+  text += `| Bank Name    : ${P(bankName, fullWidth - 80)} User Id      :  ${P(userId, 61)}|\n`;
+  text += `| Branch Name  : ${P(branchName, fullWidth - 80)} Print Date   :  ${P(printDate, 61)}|\n`;
+  text += `| Report Name  : ${P(reportTitle, fullWidth - 17)}|\n`;
+  text += mhr;
+
+  if (isSummary) {
+    text += `|${P("", wSr)}|${P("", wCode)}|${P("", wDesc)}|${P("         Closing Balance           ", wCredit + wDebit + 1, ' ', true).padEnd(wCredit + wDebit + 1)}|\n`;
+    text += `|${P("Sr No", wSr)}|${P("  Sub Gl ", wCode)}|${P("             Description                ", wDesc)}|${"-".repeat(wCredit + wDebit + 1)}|\n`;
+    text += `|${P("", wSr)}|${P("", wCode)}|${P("", wDesc)}|${P("    Credit      ", wCredit)}|${P("     Debit        ", wDebit)}|\n`;
+    text += `|${"-".repeat(wSr)}|${"-".repeat(wCode)}|${"-".repeat(wDesc)}|${"-".repeat(wCredit)}|${"-".repeat(wDebit)}|\n`;
+  } else {
+    text += `|${P("", wSr)}|${P("", wCode)}|${P("", wDesc)}|${P("", wOpening)}|${P("", wReceipt)}|${P("", wPayment)}|${P("         Closing Balance           ", wCredit + wDebit + 1, ' ', true).padEnd(wCredit + wDebit + 1)}|\n`;
+    text += `|${P("Sr No", wSr)}|${P("  Sub Gl ", wCode)}|${P("             Description                ", wDesc)}|${P("     Opening   ", wOpening)}|${P("   Receipt   ", wReceipt)}|${P("     Payment      ", wPayment)}|${"-".repeat(wCredit + wDebit + 1)}|\n`;
+    text += `|${P("", wSr)}|${P("", wCode)}|${P("", wDesc)}|${P("", wOpening)}|${P("", wReceipt)}|${P("", wPayment)}|${P("    Credit      ", wCredit)}|${P("     Debit        ", wDebit)}|\n`;
+    text += `|${"-".repeat(wSr)}|${"-".repeat(wCode)}|${"-".repeat(wDesc)}|${"-".repeat(wOpening)}|${"-".repeat(wReceipt)}|${"-".repeat(wPayment)}|${"-".repeat(wCredit)}|${"-".repeat(wDebit)}|\n`;
+  }
+
+  let grandOpening = 0, grandReceipt = 0, grandPayment = 0, grandClosingCredit = 0, grandClosingDebit = 0;
+  let globalSrNo = 1;
+
+  sortedGroupKeys.forEach(grpKey => {
+    const grp = groupsMap[grpKey];
+    text += `|${P(grp.key, fullWidth)}|\n`;
+    text += mhr;
+    
+    let grpOpening = 0, grpReceipt = 0, grpPayment = 0, grpClosingCredit = 0, grpClosingDebit = 0;
+
+    grp.rows.forEach(row => {
+      const openingVal = Math.abs(row.OPBAL || 0);
+      const receiptVal = row.CR || 0;
+      const paymentVal = row.DR || 0;
+      const closingCreditVal = row.credit || 0;
+      const closingDebitVal = Math.abs(row.debit || 0);
+
+      grpOpening += openingVal; grpReceipt += receiptVal; grpPayment += paymentVal;
+      grpClosingCredit += closingCreditVal; grpClosingDebit += closingDebitVal;
+
+      const srNo = globalSrNo++;
+      
+      if (isSummary) {
+        text += `|${P(srNo, wSr, ' ', true)}|${P(row.SubGlCode, wCode)}|${P(row.GlName, wDesc)}|${P(fmtV(closingCreditVal), wCredit, ' ', true)}|${P(fmtV(closingDebitVal), wDebit, ' ', true)}|\n`;
+      } else {
+        text += `|${P(srNo, wSr, ' ', true)}|${P(row.SubGlCode, wCode)}|${P(row.GlName, wDesc)}|${P(fmtO(openingVal), wOpening, ' ', true)}|${P(fmtV(receiptVal), wReceipt, ' ', true)}|${P(fmtV(paymentVal), wPayment, ' ', true)}|${P(fmtV(closingCreditVal), wCredit, ' ', true)}|${P(fmtV(closingDebitVal), wDebit, ' ', true)}|\n`;
+      }
+    });
+
+    grandOpening += grpOpening; grandReceipt += grpReceipt; grandPayment += grpPayment;
+    grandClosingCredit += grpClosingCredit; grandClosingDebit += grpClosingDebit;
+
+    text += mhr;
+    if (isSummary) {
+      text += `|${P("Total:         ", wSr + 1 + wCode + 1 + wDesc, ' ', true)}|${P(fmtC(grpClosingCredit), wCredit, ' ', true)}|${P(fmtC(grpClosingDebit), wDebit, ' ', true)}|\n`;
+    } else {
+      text += `|${P("Total:         ", wSr + 1 + wCode + 1 + wDesc, ' ', true)}|${P(fmtO(grpOpening), wOpening, ' ', true)}|${P(fmtT(grpReceipt), wReceipt, ' ', true)}|${P(fmtT(grpPayment), wPayment, ' ', true)}|${P(fmtC(grpClosingCredit), wCredit, ' ', true)}|${P(fmtC(grpClosingDebit), wDebit, ' ', true)}|\n`;
+    }
+    text += mhr;
+  });
+
+  if (isSummary) {
+    text += `|${P("Total Amount:  ", wSr + 1 + wCode + 1 + wDesc, ' ', true)}|${P(fmtC(grandClosingCredit), wCredit, ' ', true)}|${P(fmtC(grandClosingDebit), wDebit, ' ', true)}|\n`;
+  } else {
+    text += `|${P("Total Amount:  ", wSr + 1 + wCode + 1 + wDesc, ' ', true)}|${P(fmtO(grandOpening), wOpening, ' ', true)}|${P(fmtT(grandReceipt), wReceipt, ' ', true)}|${P(fmtT(grandPayment), wPayment, ' ', true)}|${P(fmtC(grandClosingCredit), wCredit, ' ', true)}|${P(fmtC(grandClosingDebit), wDebit, ' ', true)}|\n`;
+  }
+  text += mhr;
+
+  const diffStr = P("Difference:   ", wSr + 1 + wCode);
+  const diffValStr = P("0 ", wDesc, ' ', true);
+  if (isSummary) {
+    text += `|${diffStr}|${diffValStr}|${P("", wCredit)}|${P("", wDebit)}|\n`;
+  } else {
+    text += `|${diffStr}|${diffValStr}|${P("", wOpening)}|${P("", wReceipt)}|${P("", wPayment)}|${P("", wCredit)}|${P("", wDebit)}|\n`;
+  }
+  text += mhr;
+
+  return text;
+};
+
 // ── Lazer Report Formatted Table Component ──────────────────────────────────
 function LazerReport({ data, bankInfo, toDate, reportType }) {
   if (!data || data.length === 0) return null;
@@ -525,7 +676,18 @@ function TrialBalance() {
             <button
               key={btn}
               className="tb-btn"
-              onClick={btn === "Lazer" ? handleLazerReport : () => alert(btn)}
+              onClick={() => {
+                if (btn === "Lazer") {
+                  handleLazerReport();
+                } else if (btn === "Text Report View") {
+                  const textContent = generateTextReport(tableData, bankInfo, form.toDate, form.reportType);
+                  const newTab = window.open();
+                  newTab.document.write(`<pre style="font-family: monospace; font-size: 12px; white-space: pre; margin: 0; padding: 10px;">${textContent}</pre>`);
+                  newTab.document.close();
+                } else {
+                  alert(btn);
+                }
+              }}
               disabled={loading}
             >
               {btn}

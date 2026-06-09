@@ -1,6 +1,6 @@
 
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./GeneralLedgerWise.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -274,35 +274,20 @@ function DayWiseFormattedTable({ data, fromDate, toDate, form }) {
   const userId = "Rohini";
   const printDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
   
-  const subGlCode = form.productTypeInput || "";
-  const glName = form.productName || "";
-  const title = `${subGlCode} - ${glName} Product Summary From ${fromDate} To ${toDate}`;
+  const title = `Product Summary From ${fromDate} To ${toDate}`;
 
-  let totalPayment = 0;
-  let totalReceipt = 0;
-
-  const items = data.map((row, index) => {
-    const edate = row.ENTRYDATE ? new Date(row.ENTRYDATE).toLocaleDateString('en-GB').replace(/\//g, '-') : "";
-    const opening = parseFloat(row.Opening || row.OpeningBal) || 0;
-    const credit = parseFloat(row.Credit || row.CREDIT) || 0;
-    const debit = parseFloat(row.Debit || row.DEBIT) || 0;
-    const closing = parseFloat(row.Closing || row.ClosingBal || row.BALANCE) || 0;
-
-    totalPayment += debit;
-    totalReceipt += credit;
-
-    return {
-      index: index + 1,
-      edate,
-      opening,
-      payment: debit,
-      receipt: credit,
-      closing,
-      type: closing >= 0 ? "CR" : "DR"
-    };
+  // Group data by SUBGLCODE
+  const groups = {};
+  data.forEach((row) => {
+    const subCode = row.SUBGLCODE || form.productTypeInput || "";
+    const name = row.GLNAME || form.productName || "";
+    const groupKey = `${subCode} - ${name}`;
+    
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
+    }
+    groups[groupKey].push(row);
   });
-
-  const groupName = `${subGlCode} - ${glName}`;
 
   return (
     <div className="oc-table-wrapper">
@@ -332,11 +317,11 @@ function DayWiseFormattedTable({ data, fromDate, toDate, form }) {
       <table className="oc-table">
         <thead>
           <tr>
-            <th colSpan="7" className="title-row">{title}</th>
+            <th colSpan="7" className="title-row" style={{textAlign: "center"}}>{title}</th>
           </tr>
           <tr>
             <th style={{textAlign: "center"}}>Sr No</th>
-            <th>Effect Date</th>
+            <th style={{textAlign: "center"}}>Effect Date</th>
             <th className="num">Opening Balance</th>
             <th className="num">Payment</th>
             <th className="num">Receipt</th>
@@ -345,29 +330,65 @@ function DayWiseFormattedTable({ data, fromDate, toDate, form }) {
           </tr>
         </thead>
         <tbody>
-          <tr className="group-row">
-            <td colSpan="7" style={{fontStyle: 'italic', textDecoration: 'underline', color: '#000'}}>{groupName}</td>
-          </tr>
-          {items.map((item, i) => (
-            <tr key={i}>
-              <td style={{textAlign: "center"}}>{item.index}</td>
-              <td>{item.edate}</td>
-              <td className="num">{fmt(item.opening)}</td>
-              <td className="num">{fmt(item.payment)}</td>
-              <td className="num">{fmt(item.receipt)}</td>
-              <td className="num">{fmt(Math.abs(item.closing))}</td>
-              <td style={{textAlign: "center"}}>{item.type}</td>
-            </tr>
-          ))}
-          <tr style={{ fontWeight: "bold", color: "#000", background: "#fff" }}>
-            <td colSpan="3" style={{ textAlign: "right", paddingRight: "10px" }}>Total :</td>
-            <td className="num">{fmt(totalPayment)}</td>
-            <td className="num">{fmt(totalReceipt)}</td>
-            <td colSpan="2"></td>
-          </tr>
+          {Object.keys(groups).map((groupName) => {
+            const groupData = groups[groupName];
+            
+            // Sort groupData by ENTRYDATE
+            groupData.sort((a, b) => new Date(a.ENTRYDATE) - new Date(b.ENTRYDATE));
+
+            let totalPayment = 0;
+            let totalReceipt = 0;
+
+            const items = groupData.map((row, index) => {
+              const edate = row.ENTRYDATE ? new Date(row.ENTRYDATE).toLocaleDateString('en-GB').replace(/\//g, '-') : "";
+              const opening = parseFloat(row.Opening || row.OpeningBal) || 0;
+              const credit = parseFloat(row.Credit || row.CREDIT) || 0;
+              const debit = parseFloat(row.Debit || row.DEBIT) || 0;
+              const closing = parseFloat(row.Closing || row.ClosingBal || row.BALANCE) || 0;
+
+              totalPayment += debit;
+              totalReceipt += credit;
+
+              return {
+                index: index + 1,
+                edate,
+                opening,
+                payment: debit,
+                receipt: credit,
+                closing,
+                type: closing >= 0 ? "CR" : "DR"
+              };
+            });
+
+            return (
+              <React.Fragment key={groupName}>
+                <tr className="group-row" style={{ backgroundColor: "#f9f9f9" }}>
+                  <td colSpan="7" style={{ fontWeight: 'bold', fontStyle: 'italic', textDecoration: 'underline', color: '#000' }}>
+                    {groupName}
+                  </td>
+                </tr>
+                {items.map((item, i) => (
+                  <tr key={i}>
+                    <td style={{textAlign: "center"}}>{item.index}</td>
+                    <td style={{textAlign: "center"}}>{item.edate}</td>
+                    <td className="num">{fmt(item.opening)}</td>
+                    <td className="num">{fmt(item.payment)}</td>
+                    <td className="num">{fmt(item.receipt)}</td>
+                    <td className="num">{fmt(Math.abs(item.closing))}</td>
+                    <td style={{textAlign: "center"}}>{item.type}</td>
+                  </tr>
+                ))}
+                <tr style={{ fontWeight: "bold", color: "#000", background: "#fff" }}>
+                  <td colSpan="3" style={{ textAlign: "right", paddingRight: "10px" }}>Total :</td>
+                  <td className="num">{fmt(totalPayment)}</td>
+                  <td className="num">{fmt(totalReceipt)}</td>
+                  <td colSpan="2"></td>
+                </tr>
+              </React.Fragment>
+            );
+          })}
         </tbody>
       </table>
-
     </div>
   );
 }
@@ -390,7 +411,10 @@ function MonthWiseFormattedTable({ data, fromDate, toDate, form }) {
   let totalClosing = 0;
 
   const items = data.map((row, index) => {
-    const dateVal = row.Date || row.ENTRYDATE || row.Month || row.month || "";
+    let dateVal = row.Date || row.ENTRYDATE || row.Month || row.month || "";
+    if (!dateVal && row.MONTH && row.Year) {
+      dateVal = `${row.MONTH}/${row.Year}`;
+    }
     const opening = parseFloat(row.Opening || row.OpeningBal || row["Opening Bal"] || row.OPENING) || 0;
     const credit = parseFloat(row.Credit || row.CREDIT || row.Receipt || row.RECEIPT) || 0;
     const debit = parseFloat(row.Debit || row.DEBIT || row.Payment || row.PAYMENT) || 0;
@@ -481,8 +505,8 @@ function GeneralLedgerWise() {
     branchCode:       "1",
     productTypeInput: "",
     productName:      "",
-    fromDate:         "2025-04-01",
-    toDate:           "2026-03-30"
+    fromDate:         "2026-04-01",
+    toDate:           "2026-05-22"
   });
 
   const [reportData, setReportData] = useState([]);
