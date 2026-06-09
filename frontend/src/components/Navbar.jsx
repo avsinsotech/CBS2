@@ -4,7 +4,13 @@ import "../styles/navbar.css";
 
 import logo from "../assets/logo.png";
 
+import { useAuth } from "../context/AuthContext";
+
 function Navbar() {
+  const { user, logout } = useAuth();
+  
+  const userName = user?.user?.userName || user?.user?.loginCode || "User";
+  const avatarLetter = userName.charAt(0).toUpperCase();
 
   return (
 
@@ -61,7 +67,7 @@ function Navbar() {
         {/* DATE */}
 
         <div className="navbar-date">
-          25/05/2026
+          {new Date().toLocaleDateString('en-GB')}
         </div>
 
         {/* USER */}
@@ -69,13 +75,13 @@ function Navbar() {
         <div className="user-profile">
 
           <div className="user-avatar">
-            R
+            {avatarLetter}
           </div>
 
           <div className="user-details">
 
             <span className="user-name">
-              Rohini
+              {userName}
             </span>
 
             <span className="user-role">
@@ -88,7 +94,7 @@ function Navbar() {
 
         {/* LOGOUT */}
 
-        <button className="logout-btn">
+        <button className="logout-btn" onClick={logout}>
           Logout
         </button>
 

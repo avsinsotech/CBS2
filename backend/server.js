@@ -261,6 +261,7 @@ const crrSlrReportRoutes        = require('./routes/crrSlrReport');
 const crarReportRoutes          = require('./routes/crarReport');
 const documentRegisterRoutes    = require('./routes/documentRegister');
 const allOkReportRoutes         = require('./routes/allOkReport');
+const authRoutes                = require('./routes/auth');
 
 const app = express();
 
@@ -367,6 +368,9 @@ app.get('/api/bank-info', async (req, res) => {
   }
 });
 // ── Routes ───────────────────────────────────────────────────
+// Auth route
+app.use('/api/auth',                   authRoutes);
+
 // Core routes
 app.use('/api/gl-report',              glReportRoutes);
 app.use('/api/balance-register',       balanceRegisterRoutes);

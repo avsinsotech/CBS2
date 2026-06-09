@@ -58,8 +58,16 @@ import DepositLoanStatement from "./pages/DepositLoanStatement";
 import LoanSummary from "./pages/LoanSummary";
 import LoanDefaulterList from "./pages/LoanDefaulterList";
 import RateWiseDepositLoan from "./pages/RateWiseDepositLoan";
+import Login from "./pages/Login";
+import { useAuth } from "./context/AuthContext";
 
 function App() {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
