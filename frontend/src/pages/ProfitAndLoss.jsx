@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import "./ProfitAndLoss.css";
 
-const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // ── Per report-type config ────────────────────────────────────────────────────
 const REPORT_CONFIG = {
