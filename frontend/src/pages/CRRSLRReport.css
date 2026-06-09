@@ -1,0 +1,351 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ── WRAPPER ── */
+.crrslr-wrapper {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 74px);
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── CARD ── */
+.crrslr-card {
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ── HEADER ── */
+.crrslr-header {
+  background: linear-gradient(90deg, #1e293b, #3b82f6);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 18px;
+  letter-spacing: 0.4px;
+}
+
+/* ── FORM SECTION ── */
+.crrslr-form-section {
+  border: 1px solid #c8d8f0;
+  border-radius: 4px;
+  margin: 16px;
+  padding: 20px 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── ROW ── */
+.crrslr-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ── LABEL ── */
+.crrslr-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 150px;
+  white-space: nowrap;
+  text-align: right;
+  margin-right: 8px;
+}
+
+/* ── INPUT ── */
+.crrslr-input {
+  height: 34px;
+  width: 200px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #374151;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.crrslr-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* ── RADIO ROW ── */
+.crrslr-radio-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: 158px;
+}
+
+.crrslr-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+}
+
+.crrslr-radio {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+}
+
+/* ── BUTTON ROW ── */
+.crrslr-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 16px 16px 16px;
+}
+
+/* ── BUTTONS ── */
+.crrslr-btn {
+  height: 36px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.crrslr-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.crrslr-btn-blue {
+  background: #1e293b;
+}
+
+.crrslr-btn-secondary {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.crrslr-btn-excel {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.crrslr-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── ERROR & LOADING ── */
+.crrslr-error {
+  font-size: 12.5px;
+  color: #dc2626;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.crrslr-loading-bar {
+  width: 100%;
+  height: 4px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.crrslr-loading-fill {
+  width: 50%;
+  height: 100%;
+  background-color: #3b82f6;
+  animation: loading-slide 1.5s infinite linear;
+}
+
+@keyframes loading-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ── PREVIEW TOOLBAR ── */
+.crrslr-preview-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 12px 20px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.crrslr-preview-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.crrslr-btn-print {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.crrslr-btn-print:hover {
+  opacity: 0.9;
+}
+
+/* ── REPORT VIEW CONTAINER ── */
+.crrslr-formatted-report {
+  background: #ffffff;
+  padding: 24px 30px;
+  border: 1.5px solid #b8c2cc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.crrslr-fmt-org-name {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  color: #000000;
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+}
+
+.crrslr-fmt-meta-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  border-bottom: 1px solid #111111;
+  padding-bottom: 12px;
+}
+
+.crrslr-fmt-meta-left,
+.crrslr-fmt-meta-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.crrslr-fmt-meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #111111;
+}
+
+.crrslr-fmt-meta-key {
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.crrslr-fmt-meta-sep {
+  font-weight: 600;
+}
+
+.crrslr-fmt-meta-val {
+  color: #222222;
+}
+
+/* Formatted table */
+.crrslr-fmt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.crrslr-fmt-th {
+  background: #f8fafc;
+  font-weight: 700;
+  color: #000000;
+  padding: 8px 10px;
+  border: 1px solid #000000;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.crrslr-fmt-td {
+  padding: 8px 10px;
+  border: 1px solid #000000;
+  color: #111111;
+  vertical-align: middle;
+  word-break: break-word;
+}
+
+/* ── PRINT STYLES ── */
+@media print {
+  .navbar,
+  .sidebar,
+  .no-print,
+  .crrslr-preview-toolbar,
+  .crrslr-card {
+    display: none !important;
+  }
+
+  body, html {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .crrslr-wrapper {
+    padding: 0;
+    background: #ffffff;
+    min-height: unset;
+  }
+
+  .crrslr-formatted-report {
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    gap: 15px;
+  }
+
+  .crrslr-fmt-th,
+  .crrslr-fmt-td {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+
+  .crrslr-fmt-org-name {
+    font-size: 13px;
+  }
+
+  .crrslr-fmt-meta-row {
+    font-size: 10px;
+  }
+}
