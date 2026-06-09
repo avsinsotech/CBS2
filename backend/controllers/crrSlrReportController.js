@@ -19,12 +19,15 @@ const executeCrrSlrReport = async (req, res, responseMode = 'json') => {
         const asOnDateStr = convertToSqlDate(req.body.asOnDate || req.query.asOnDate);
         const toDateStr = convertToSqlDate(req.body.toDate || req.query.toDate);
 
-        let spName = 'ISP_CRR';
+        let spName = 'ISP_CRR1';
         let flagVal = 'CRR';
 
         if (reportType.toUpperCase() === 'SLR') {
             spName = 'ISP_SLR';
             flagVal = 'SLR';
+        } else if (reportType.toUpperCase() === 'CRR') {
+            spName = 'ISP_CRR1';
+            flagVal = 'CRR';
         } else if (reportType.toUpperCase() === 'CRR1') {
             spName = 'ISP_CRR1';
             flagVal = 'CRR';
