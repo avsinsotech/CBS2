@@ -2,19 +2,11 @@ import { useState, useRef } from "react";
 import "./ReceiptPaymentWithBal.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-function toISO(raw) {
-  const parts = raw.trim().split("/");
-  if (parts.length !== 3) return null;
-  let [d, m, y] = parts;
-  if (y.length === 2) y = "20" + y;
-  return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-}
-
-function isValidDate(raw) {
-  const parts = raw.trim().split("/");
-  if (parts.length !== 3) return false;
-  const [d, m] = parts.map(Number);
-  return d >= 1 && d <= 31 && m >= 1 && m <= 12;
+function fmtDate(iso) {
+  if (!iso) return "";
+  const parts = iso.split("-");
+  if (parts.length !== 3) return iso;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
 const ENDPOINT_MAP = {
@@ -31,14 +23,20 @@ const fmt = (v) => {
 };
 
 // ── Formatted Report Component (matches the picture exactly) ─────────────────
-function RPBReportFormatted({ data, fromDate, toDate, bankName, branchName, userId, printDate }) {
+function RPBReportFormatted({ data, fromDate, toDate, bankName, branchName, userId, printDate, selectType }) {
 
   // ── Build GL display name: "GL - GLName" (e.g. "01 - CASH Opening") ──
-  const fmtGlName = (glCode, glName) => {
+  const fmtGlName = (glCode, glName, isMarathi) => {
     if (!glCode && !glName) return "";
+    
+    let nameElem = glName;
+    if (isMarathi && glName) {
+      nameElem = <span className="rpb-fmt-marathi-text" style={{ fontSize: '18px' }}>{glName}</span>;
+    }
+
     if (!glName) return glCode || "";
-    if (!glCode) return glName;
-    return `${glCode} - ${glName}`;
+    if (!glCode) return nameElem;
+    return <>{glCode} - {nameElem}</>;
   };
 
   // ── Determine DrCr from payment balance ──
@@ -91,7 +89,7 @@ function RPBReportFormatted({ data, fromDate, toDate, bankName, branchName, user
           {/* Title row */}
           <tr>
             <th colSpan="8" className="rpb-fmt-title-row">
-              Receipt &amp; Payment With Balance {fromDate} And {toDate}
+              Receipt &amp; Payment With Balance {fmtDate(fromDate)} And {fmtDate(toDate)}
             </th>
           </tr>
           {/* Section headers */}
@@ -117,7 +115,11 @@ function RPBReportFormatted({ data, fromDate, toDate, bankName, branchName, user
               <td className="rpb-fmt-td rpb-fmt-col-srno">{index + 1}</td>
               {/* Receipt side */}
               <td className="rpb-fmt-td rpb-fmt-col-glname">
-                {fmtGlName(row.RecGl, row.RecGlName)}
+                {fmtGlName(
+                  row.RecGl, 
+                  selectType === "Marathi" ? (row.RecGlName_M || row.RecGlName) : row.RecGlName,
+                  selectType === "Marathi"
+                )}
               </td>
               <td className="rpb-fmt-td rpb-fmt-col-amt rpb-fmt-num">
                 {fmt(row.RecAmt)}
@@ -127,7 +129,11 @@ function RPBReportFormatted({ data, fromDate, toDate, bankName, branchName, user
               </td>
               {/* Payment side */}
               <td className="rpb-fmt-td rpb-fmt-col-glname">
-                {fmtGlName(row.PayGl, row.PayGlName)}
+                {fmtGlName(
+                  row.PayGl, 
+                  selectType === "Marathi" ? (row.PayGlName_M || row.PayGlName) : row.PayGlName,
+                  selectType === "Marathi"
+                )}
               </td>
               <td className="rpb-fmt-td rpb-fmt-col-amt rpb-fmt-num">
                 {fmt(row.PayAmt)}
@@ -161,8 +167,8 @@ function ReceiptPaymentWithBal() {
   const [form, setForm] = useState({
     selectType: "Skip Data",
     branchCode: "1",
-    fromDate:   "01/04/2025",
-    toDate:     "30/03/2026",
+    fromDate:   "2026-04-01",
+    toDate:     "2026-05-22",
   });
 
   const [reportData, setReportData] = useState([]);
@@ -182,8 +188,8 @@ function ReceiptPaymentWithBal() {
 
   const validate = () => {
     if (!form.branchCode.trim())     return "Branch Code is required.";
-    if (!isValidDate(form.fromDate)) return "From Date must be in DD/MM/YYYY format.";
-    if (!isValidDate(form.toDate))   return "To Date must be in DD/MM/YYYY format.";
+    if (!form.fromDate) return "From Date is required.";
+    if (!form.toDate)   return "To Date is required.";
     return null;
   };
 
@@ -194,8 +200,8 @@ function ReceiptPaymentWithBal() {
     const path = ENDPOINT_MAP[form.selectType];
     const params = new URLSearchParams({
       BRCD: form.branchCode.trim(),
-      PFDT: toISO(form.fromDate),
-      PTDT: toISO(form.toDate),
+      PFDT: form.fromDate,
+      PTDT: form.toDate,
     });
 
     setLoading(true);
@@ -324,11 +330,11 @@ function ReceiptPaymentWithBal() {
           {/* From / To Date */}
           <div className="rpb-row">
             <label className="rpb-label">From Date</label>
-            <input className="rpb-input" name="fromDate"
-              value={form.fromDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+            <input type="date" className="rpb-input" name="fromDate"
+              value={form.fromDate} onChange={handleChange} />
             <label className="rpb-inline-label">To Date</label>
-            <input className="rpb-input" name="toDate"
-              value={form.toDate} onChange={handleChange} placeholder="DD/MM/YYYY" />
+            <input type="date" className="rpb-input" name="toDate"
+              value={form.toDate} onChange={handleChange} />
           </div>
 
           {/* Error */}
@@ -377,6 +383,7 @@ function ReceiptPaymentWithBal() {
                   branchName={bankInfo.branchName}
                   userId={bankInfo.printUserID}
                   printDate={bankInfo.printDate}
+                  selectType={form.selectType}
                 />
               </div>
             </div>
