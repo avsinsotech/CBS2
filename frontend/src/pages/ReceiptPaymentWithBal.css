@@ -1,3 +1,4 @@
+@font-face { font-family: 'Shivaji02_Custom'; src: url('/fonts/Shivaji02.ttf') format('truetype'); font-weight: normal; font-style: normal; }
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
 /* ─── wrapper ─────────────────────────────────────────── */
@@ -473,4 +474,6 @@
   }
 
   .rpb-fmt-meta-row { font-size: 9px; }
-}
+} 
+.rpb-fmt-marathi-text { font-family: 'Shivaji02_Custom', 'Shivaji02', 'Kiran', 'Kruti Dev 010', 'Arial', sans-serif !important; font-size: 16px; }
+
