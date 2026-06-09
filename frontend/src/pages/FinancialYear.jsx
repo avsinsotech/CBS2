@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./FinancialYear.css";
 
-const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const parseDate = (raw) => {
   const parts = raw.trim().split("/");

@@ -305,40 +305,63 @@ app.get('/api/bank-info', async (req, res) => {
   try {
     const pool = await poolPromise;
     const brcd = req.query.BRCD || '1';
+    const loginCode = req.query.LoginCode || '';
 
-    // Try ABORGNM table for org/bank name
+    // Society / Bank Name (BRCD = 0)
     let bankName = '';
     try {
-      const orgResult = await pool.request().query('SELECT TOP 1 ABORGNM FROM ABORGNM');
-      if (orgResult.recordset && orgResult.recordset.length > 0) {
-        bankName = orgResult.recordset[0].ABORGNM || '';
+      const bankResult = await pool.request()
+        .query("SELECT BANKNAME FROM Bankname WHERE BRCD = 0");
+      if (bankResult.recordset && bankResult.recordset.length > 0) {
+        bankName = bankResult.recordset[0].BANKNAME || '';
       }
     } catch (e) {
-      // Table might not exist, try alternatives
-      try {
-        const orgResult2 = await pool.request().query("SELECT TOP 1 ABORGNM FROM ABOrg");
-        if (orgResult2.recordset && orgResult2.recordset.length > 0) {
-          bankName = orgResult2.recordset[0].ABORGNM || '';
-        }
-      } catch (e2) {
-        // ignore - will return empty
-      }
+      // Table might not exist – return empty
     }
 
-    // Try BranchMaster for branch name
+    // Branch Name (MIDNAME from Bankname for the given BRCD)
     let branchName = '';
     try {
       const brResult = await pool.request()
         .input('BRCD', sql.VarChar, brcd)
-        .query('SELECT TOP 1 BrName FROM BranchMaster WHERE BrCode = @BRCD');
+        .query("SELECT MIDNAME AS BranchName FROM Bankname WHERE BRCD = @BRCD");
       if (brResult.recordset && brResult.recordset.length > 0) {
-        branchName = brResult.recordset[0].BrName || '';
+        branchName = brResult.recordset[0].BranchName || '';
       }
     } catch (e) {
-      // ignore - will return empty
+      // ignore
     }
 
-    res.json({ bankName, branchName });
+    // Print Date (server date in DD/MM/YYYY format)
+    let printDate = '';
+    try {
+      const dateResult = await pool.request()
+        .query("SELECT CONVERT(VARCHAR(10), GETDATE(), 103) AS PrintDate");
+      if (dateResult.recordset && dateResult.recordset.length > 0) {
+        printDate = dateResult.recordset[0].PrintDate || '';
+      }
+    } catch (e) {
+      // Fallback to JS date
+      const now = new Date();
+      printDate = now.toLocaleDateString('en-GB');
+    }
+
+    // Print UserID from UserMaster (if LoginCode is provided)
+    let printUserID = '';
+    if (loginCode) {
+      try {
+        const userResult = await pool.request()
+          .input('LoginCode', sql.VarChar, loginCode)
+          .query("SELECT UserName FROM UserMaster WHERE LoginCode = @LoginCode");
+        if (userResult.recordset && userResult.recordset.length > 0) {
+          printUserID = userResult.recordset[0].UserName || '';
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    res.json({ bankName, branchName, printDate, printUserID });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -1,8 +1,7 @@
 import { useState, useRef } from "react";
 import "./ReceiptPaymentWithBal.css";
 
-// const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 function toISO(raw) {
   const parts = raw.trim().split("/");
   if (parts.length !== 3) return null;
@@ -32,8 +31,7 @@ const fmt = (v) => {
 };
 
 // ── Formatted Report Component (matches the picture exactly) ─────────────────
-function RPBReportFormatted({ data, fromDate, toDate, bankName, branchName, userId }) {
-  const printDate = new Date().toLocaleDateString("en-GB");
+function RPBReportFormatted({ data, fromDate, toDate, bankName, branchName, userId, printDate }) {
 
   // ── Build GL display name: "GL - GLName" (e.g. "01 - CASH Opening") ──
   const fmtGlName = (glCode, glName) => {
@@ -173,7 +171,7 @@ function ReceiptPaymentWithBal() {
   const [error,      setError]      = useState("");
   const [fetched,    setFetched]    = useState(false);
   const [activeButton, setActiveButton] = useState("");
-  const [bankInfo,   setBankInfo]   = useState({ bankName: "", branchName: "" });
+  const [bankInfo,   setBankInfo]   = useState({ bankName: "", branchName: "", printDate: "", printUserID: "" });
   const reportRef = useRef(null);
 
   const handleChange = (e) => {
@@ -216,7 +214,9 @@ function ReceiptPaymentWithBal() {
 
       // Fetch bank/branch info
       try {
-        const infoRes = await fetch(`${API_BASE_URL}/api/bank-info?BRCD=${form.branchCode.trim()}`);
+        const loginCode = import.meta.env.VITE_LOGIN_CODE || localStorage.getItem('loginCode') || '';
+        console.log('LoginCode being sent:', loginCode);
+        const infoRes = await fetch(`${API_BASE_URL}/api/bank-info?BRCD=${form.branchCode.trim()}&LoginCode=${loginCode}`);
         if (infoRes.ok) {
           const info = await infoRes.json();
           setBankInfo(info);
@@ -375,7 +375,8 @@ function ReceiptPaymentWithBal() {
                   toDate={form.toDate}
                   bankName={bankInfo.bankName}
                   branchName={bankInfo.branchName}
-                  userId={"AVS"}
+                  userId={bankInfo.printUserID}
+                  printDate={bankInfo.printDate}
                 />
               </div>
             </div>

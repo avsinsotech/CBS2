@@ -1,7 +1,6 @@
-
 import { useState, useRef } from "react";
 import "./BalanceSheet.css";
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Format numbers with 2 decimal places and Indian locale
 const fmt = (v) => {
@@ -292,7 +291,7 @@ function BalanceSheet() {
   const [fetched, setFetched]       = useState(false);
   const [activeAction, setActiveAction] = useState("");
 
-  const [bankInfo, setBankInfo] = useState({ bankName: "", branchName: "" });
+  const [bankInfo, setBankInfo] = useState({ bankName: "", branchName: "", printDate: "", printUserID: "" });
 
   const isSingleDate =
     form.reportType === "As On Date" || form.reportType === "Marathi BS";
@@ -366,7 +365,8 @@ function BalanceSheet() {
 
       // Fetch bank/branch info
       try {
-        const infoRes = await fetch(`${API_BASE_URL}/api/bank-info?BRCD=${form.branchCode.trim()}`);
+        const loginCode = import.meta.env.VITE_LOGIN_CODE || localStorage.getItem('loginCode') || '';
+        const infoRes = await fetch(`${API_BASE_URL}/api/bank-info?BRCD=${form.branchCode.trim()}&LoginCode=${loginCode}`);
         if (infoRes.ok) {
           const info = await infoRes.json();
           setBankInfo(info);
@@ -557,8 +557,8 @@ function BalanceSheet() {
               data={reportData} 
               bankName={bankInfo.bankName} 
               branchName={bankInfo.branchName} 
-              userId="Rohini" 
-              printDate={new Date().toLocaleDateString('en-GB')} 
+              userId={bankInfo.printUserID} 
+              printDate={bankInfo.printDate} 
               asOnDateText={displayDateFormatted} 
               activeAction={activeAction}
             />

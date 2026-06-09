@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./GeneralLedgerWise.css";
 
-const API_BASE_URL = "https://cbsapi.avsinsotech.com:8596";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Format numbers with 2 decimal places and Indian locale
 const fmt = (v) => {

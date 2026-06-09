@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import "./TrialBalance.css";
 
-const API_BASE = "http://localhost:5000/api/trial-balance";
+const API_BASE = `${import.meta.env.VITE_API_URL}/api/trial-balance`;
 
 // Format numbers with 2 decimal places and Indian locale
 const fmt = (v) => {
@@ -25,10 +25,10 @@ function LazerReport({ data, bankInfo, toDate, reportType }) {
 
   const isSummary = reportType === "Summary Wise";
   const displayDate = toDate ? toDate.split("-").reverse().join("/") : "";
-  const bankName = bankInfo.bankName || "SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI";
-  const branchName = bankInfo.branchName || "HEAD OFFICE";
-  const userId = "Rohini";
-  const printDate = new Date().toLocaleDateString("en-GB");
+  const bankName = bankInfo.bankName || "";
+  const branchName = bankInfo.branchName || "";
+  const userId = bankInfo.printUserID || "";
+  const printDate = bankInfo.printDate || "";
 
   // Group the data by GLGROUP + GLGrp
   const groupsMap = {};
@@ -268,8 +268,10 @@ function TrialBalance() {
   const [tableData, setTableData] = useState([]);
   const [activeReport, setActiveReport] = useState("");
   const [bankInfo, setBankInfo] = useState({
-    bankName: "SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI",
-    branchName: "HEAD OFFICE"
+    bankName: "",
+    branchName: "",
+    printDate: "",
+    printUserID: ""
   });
   const reportRef = useRef(null);
 
@@ -348,13 +350,11 @@ function TrialBalance() {
       
       // Proactively fetch bank information
       try {
-        const infoRes = await fetch(`${API_BASE.replace('/trial-balance', '')}/bank-info?BRCD=${form.branchCode.trim()}`);
+        const loginCode = import.meta.env.VITE_LOGIN_CODE || localStorage.getItem('loginCode') || '';
+        const infoRes = await fetch(`${API_BASE.replace('/trial-balance', '')}/bank-info?BRCD=${form.branchCode.trim()}&LoginCode=${loginCode}`);
         if (infoRes.ok) {
           const infoData = await infoRes.json();
-          setBankInfo({
-            bankName: infoData.bankName || "SHIVRANA GRAMIN BIGARSHETI SAH. PATSANSTHA MARYADIT GHOTI",
-            branchName: infoData.branchName || "HEAD OFFICE"
-          });
+          setBankInfo(infoData);
         }
       } catch (e) {
         console.error("Failed to fetch bank info:", e);
